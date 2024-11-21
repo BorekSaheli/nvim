@@ -10,3 +10,12 @@ vim.opt.clipboard = "unnamedplus"
 -- line numbering
 vim.opt.number = true
 vim.opt.relativenumber = true
+
+-- Auto format on save for Python files
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.py",
+    callback = function()
+        vim.lsp.buf.format({ async = false })
+    end,
+    desc = "Auto format Python files on save",
+})
