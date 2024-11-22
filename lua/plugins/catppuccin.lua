@@ -89,6 +89,13 @@ return {
                         -- Apply new color to operators
                         ["@operator"] = { fg = C.operator_color },
 
+						["@keyword.operator.python"] = { fg = C.mauve },
+
+						["@punctuation.delimiter.python"] = { fg = C.text },
+
+						 -- Highlight for `#` symbol in comments
+						 CommentHash = { fg = C.dark_blue },
+
 
                     }
                 end,
