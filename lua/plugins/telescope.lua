@@ -15,7 +15,7 @@ return {
     { "<leader>fF", "<cmd>Telescope find_files hidden=true<cr>", desc = "hidden [F]iles" },
     { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live [g]rep" },
     { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "[b]uffers" },
-    { "<leader><leader>", "<cmd>Telescope buffers<cr>", desc = "buffers" },
+    -- { "<leader><leader>", "<cmd>Telescope buffers<cr>", desc = "buffers" },
     { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "[h]elp tags" },
   },
   config = function(_, opts)
