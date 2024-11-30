@@ -19,5 +19,7 @@ vim.opt.relativenumber = true
 --     end,
 --     desc = "Auto format Python files on save",
 -- })
-vim.keymap.set('n', '<leader><CR>', ':w<CR>:!python %<CR>', { desc = "Run current Python file" })
+vim.keymap.set('n', '<leader><CR>', ':w<CR>:!python %<CR>', {
+    desc = "Run current Python file"
+})
 

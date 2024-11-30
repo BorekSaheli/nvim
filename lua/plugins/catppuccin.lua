@@ -32,7 +32,7 @@ return {
                     maroon = "#b0cfc4",
                     peach = "#deb259",
                     yellow = "#a19588",
-                    green = "#b7d732",
+                    green = "#9dba2a",
                     teal = "#95ae3e",
                     sky = "#89dceb",
                     sapphire = "#74c7ec",
