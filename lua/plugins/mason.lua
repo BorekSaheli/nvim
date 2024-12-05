@@ -7,7 +7,7 @@ return {{
     "williamboman/mason-lspconfig.nvim",
     config = function()
         require("mason-lspconfig").setup({
-            ensure_installed = {"lua_ls", "ruff", "pyright"}
+            ensure_installed = {"lua_ls", "pyright"}
         })
     end
 }, {
@@ -23,9 +23,9 @@ return {{
             capabilities = capabilities
         })
 
-        lspconfig.ruff.setup({
-            capabilities = capabilities
-        })
+        -- lspconfig.ruff.setup({
+        --     capabilities = capabilities
+        -- })
 
         lspconfig.lua_ls.setup({
             capabilities = capabilities
@@ -53,8 +53,8 @@ return {{
         vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {
             desc = "Go to Definition"
         })
-        vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, {
-            desc = "Code Action"
-        })
+        -- vim.keymap.set({'n', 'v'}, '<leader>ca', vim.lsp.buf.code_action, {
+        --     desc = "Code Action"
+        -- })
     end
 }}
