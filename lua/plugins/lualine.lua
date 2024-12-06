@@ -24,6 +24,17 @@ return {
             return ft
         end
 
+        -- Function to get Copilot status
+        local function copilot_status()
+            local file = io.open(vim.fn.stdpath('data') .. '/copilot_state', 'r')
+            if file then
+                local state = file:read('*a')
+                file:close()
+                return state == '1' and '' or ''
+            end
+            return '' -- Default to enabled
+        end
+
         require("lualine").setup({
             options = {
                 theme = "auto"
@@ -32,7 +43,8 @@ return {
                 lualine_x = {
                     'encoding',
                     'fileformat',
-                    { filetype_with_venv }
+                    copilot_status, -- Add Copilot status to lualine
+                    filetype_with_venv
                 }
             }
         })

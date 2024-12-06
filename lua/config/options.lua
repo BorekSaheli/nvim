@@ -27,7 +27,7 @@ vim.keymap.set('n', '<F5>', ':w<CR>:aboveleft split term://python %<CR>:startins
 vim.opt.backup = false  -- Prevents creating a backup file
 vim.keymap.set('n', '<C-z>', '<Nop>', { desc = "Disable Ctrl+Z" })  -- Disable Ctrl+Z
 
--- Comment/uncomment current line or selected text
-vim.keymap.set('n', '<leader>c', '<Plug>(comment_toggle_linewise_current)', { desc = "Comment/uncomment current line" })
-vim.keymap.set('x', '<leader>c', '<Plug>(comment_toggle_linewise_visual)', { desc = "Comment/uncomment selected text" })
+-- -- Comment/uncomment current line or selected text
+-- vim.keymap.set('n', '<leader>c', '<Plug>(comment_toggle_linewise_current)', { desc = "Comment/uncomment current line" })
+-- vim.keymap.set('x', '<leader>c', '<Plug>(comment_toggle_linewise_visual)', { desc = "Comment/uncomment selected text" })
 
