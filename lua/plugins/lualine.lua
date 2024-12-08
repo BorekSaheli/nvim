@@ -19,7 +19,7 @@ return {
             local ft = vim.bo.filetype
             local venv = get_venv()
             if venv and ft == "python" then
-                return " %#LualinePythonIcon# %* Python (" .. venv .. ')'
+                return "%#LualinePythonIcon# %* venv: " .. venv .. ''
             end
             return ft
         end
@@ -35,6 +35,16 @@ return {
             return '' -- Default to enabled
         end
 
+        local function diagnostic_status()
+            local file = io.open(vim.fn.stdpath('data') .. '/diagnostic_state', 'r')
+            if file then
+                local state = file:read('*a')
+                file:close()
+                return state == '1' and 'Diag: ' or 'Diag: '  -- Diagnostic icon
+            end
+            return 'Diag: '  -- Default to disabled icon
+        end
+
         require("lualine").setup({
             options = {
                 theme = "auto"
@@ -43,7 +53,8 @@ return {
                 lualine_x = {
                     'encoding',
                     'fileformat',
-                    copilot_status, -- Add Copilot status to lualine
+                    copilot_status,
+                    diagnostic_status,  -- Add diagnostic status
                     filetype_with_venv
                 }
             }
