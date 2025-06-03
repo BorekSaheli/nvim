@@ -6,7 +6,7 @@ return {
         require("catppuccin").setup {
             flavour = "mocha",
             term_colors = true,
-            transparent_background = false,
+            transparent_background = true,
             no_italic = false,
             no_bold = false,
             styles = {
@@ -106,5 +106,17 @@ return {
         vim.opt.guifont = "Consolas:h12"
 
         vim.cmd.colorscheme "catppuccin"
+
+        -- Simulate darker background for line numbers and diagnostic column
+        -- Line numbers: bright and readable, fully transparent background
+        vim.api.nvim_set_hl(0, "LineNr",       { fg = "#7f849c", bg = "NONE" })       -- subtle but readable
+        vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#f9e2af", bg = "NONE", bold = true }) -- highlight current line number
+
+        -- Sign column (diagnostics etc.): also fully transparent
+        vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
+
+        -- -- Optional: make statusline separators transparent too
+        -- vim.api.nvim_set_hl(0, "VertSplit", { bg = "NONE", fg = "#45475a" })
+
     end,
 }

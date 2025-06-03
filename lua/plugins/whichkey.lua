@@ -32,9 +32,9 @@ return {
       function()
         diagnostic_enabled = not diagnostic_enabled
         if diagnostic_enabled then
-          vim.diagnostic.enable()
+          vim.diagnostic.show() -- Changed from enable()
         else
-          vim.diagnostic.disable()
+          vim.diagnostic.hide() -- Changed from disable()
         end
         save_diagnostic_state(diagnostic_enabled)
       end,
@@ -57,9 +57,9 @@ return {
     -- Apply the saved state when Neovim starts
     vim.defer_fn(function()
       if diagnostic_enabled then
-        vim.diagnostic.enable()
+        vim.diagnostic.show() -- Changed from enable()
       else
-        vim.diagnostic.disable()
+        vim.diagnostic.hide() -- Changed from disable()
       end
     end, 100)
   end,
