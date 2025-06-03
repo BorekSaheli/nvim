@@ -5,7 +5,10 @@ return {
     "nvim-tree/nvim-web-devicons",
     {
       "nvim-telescope/telescope-fzf-native.nvim",
-      build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release",
+      build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
+      cond = function()
+        return vim.fn.executable("cmake") == 1
+      end,
     },
     "nvim-telescope/telescope-ui-select.nvim",
   },
@@ -15,7 +18,6 @@ return {
     { "<leader>fF", "<cmd>Telescope find_files hidden=true<cr>", desc = "hidden [F]iles" },
     { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live [g]rep" },
     { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "[b]uffers" },
-    -- { "<leader><leader>", "<cmd>Telescope buffers<cr>", desc = "buffers" },
     { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "[h]elp tags" },
   },
   config = function(_, opts)
@@ -35,14 +37,13 @@ return {
       },
       extensions = {
         ["ui-select"] = {
-          require("telescope.themes").get_dropdown {
-            -- even more opts
-          }
-        }
-      }
+          require("telescope.themes").get_dropdown {},
+        },
+      },
     })
 
-    telescope.load_extension("fzf")
-    telescope.load_extension("ui-select")
+    -- Safe loading of extensions
+    pcall(telescope.load_extension, "fzf")
+    pcall(telescope.load_extension, "ui-select")
   end,
 }
