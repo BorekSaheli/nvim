@@ -20,8 +20,12 @@ return {{
         vim.lsp.set_log_level("debug")
 
         lspconfig.pyright.setup({
-            capabilities = capabilities
-        })
+        capabilities = capabilities,
+        on_init = function(client)
+        client.server_capabilities.semanticTokensProvider = nil
+        end
+    })
+
 
         -- lspconfig.ruff.setup({
         --     capabilities = capabilities

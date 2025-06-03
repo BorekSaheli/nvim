@@ -5,7 +5,7 @@ return {
     main = "nvim-treesitter.configs",
     opts = {
       -- Parsers that should always be installed
-      ensure_installed = { "c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
+      ensure_installed = { "python","c", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
       -- Auto install missing parsers when entering a buffer
       auto_install = true,
 
