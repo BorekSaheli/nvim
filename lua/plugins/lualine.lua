@@ -1,63 +1,120 @@
 return {
-    'nvim-lualine/lualine.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function()
-        -- Create custom highlight group for the Python icon
-        vim.api.nvim_set_hl(0, 'LualinePythonIcon', { fg = '#FFD700' })  -- Using a golden yellow color
+  'nvim-lualine/lualine.nvim',
+  dependencies = { 'nvim-tree/nvim-web-devicons' },
+  config = function()
+    --------------------------------------------------------------------
+    -- 1.  Borek colour palette (taken from borektheme.omp.json)
+    --------------------------------------------------------------------
+    local colors = {
+      base      = '#000000',
+      text      = '#f9e2af',
+      surface0  = '#313244',
+      crust     = '#11111b',
+      overlay1  = '#7f849c',
 
-        -- Function to get virtual env
-        local function get_venv()
-            local venv = vim.env.VIRTUAL_ENV
-            if venv then
-                return string.match(venv, "([^/]+)$")
-            end
-            return nil
-        end
+      peach     = '#deb259',  -- yellow-orange
+      sapphire  = '#74c7ec',  -- cyan-blue
+      lavender  = '#93b7ab',  -- soft teal
+      mauve     = '#c6003c',  -- magenta-red
+      teal      = '#95ae3e',  -- olive-green
+    }
 
-        -- Function to combine filetype and venv
-        local function filetype_with_venv()
-            local ft = vim.bo.filetype
-            local venv = get_venv()
-            if venv and ft == "python" then
-                return "%#LualinePythonIcon# %* venv: " .. venv .. ''
-            end
-            return ft
-        end
+    --------------------------------------------------------------------
+    -- 2.  Lualine theme table that mirrors Borek
+    --------------------------------------------------------------------
+    local borek_theme = {
+      normal  = {
+        a = { fg = colors.base,   bg = colors.peach,    gui = 'bold' },
+        b = { fg = colors.text,   bg = colors.surface0 },
+        c = { fg = colors.text,   bg = colors.crust    },
+      },
+      insert  = {
+        a = { fg = colors.base,   bg = colors.sapphire, gui = 'bold' },
+        b = { fg = colors.text,   bg = colors.surface0 },
+        c = { fg = colors.text,   bg = colors.crust    },
+      },
+      visual  = {
+        a = { fg = colors.base,   bg = colors.lavender, gui = 'bold' },
+        b = { fg = colors.text,   bg = colors.surface0 },
+        c = { fg = colors.text,   bg = colors.crust    },
+      },
+      replace = {
+        a = { fg = colors.base,   bg = colors.mauve,    gui = 'bold' },
+        b = { fg = colors.text,   bg = colors.surface0 },
+        c = { fg = colors.text,   bg = colors.crust    },
+      },
+      command = {
+        a = { fg = colors.base,   bg = colors.teal,     gui = 'bold' },
+        b = { fg = colors.text,   bg = colors.surface0 },
+        c = { fg = colors.text,   bg = colors.crust    },
+      },
+      inactive = {
+        a = { fg = colors.overlay1, bg = colors.surface0 },
+        b = { fg = colors.overlay1, bg = colors.surface0 },
+        c = { fg = colors.overlay1, bg = colors.crust    },
+      },
+    }
 
-        -- Function to get Copilot status
-        local function copilot_status()
-            local file = io.open(vim.fn.stdpath('data') .. '/copilot_state', 'r')
-            if file then
-                local state = file:read('*a')
-                file:close()
-                return state == '1' and '' or ''
-            end
-            return '' -- Default to enabled
-        end
+    --------------------------------------------------------------------
+    -- 3.  Custom highlight just for the Python logo
+    --------------------------------------------------------------------
+    vim.api.nvim_set_hl(0, 'LualinePythonIcon', { fg = colors.peach })
 
-        local function diagnostic_status()
-            local file = io.open(vim.fn.stdpath('data') .. '/diagnostic_state', 'r')
-            if file then
-                local state = file:read('*a')
-                file:close()
-                return state == '1' and 'Diag: ' or 'Diag: '  -- Diagnostic icon
-            end
-            return 'Diag: '  -- Default to disabled icon
-        end
-
-        require("lualine").setup({
-            options = {
-                theme = "auto"
-            },
-            sections = {
-                lualine_x = {
-                    'encoding',
-                    'fileformat',
-                    copilot_status,
-                    diagnostic_status,  -- Add diagnostic status
-                    filetype_with_venv
-                }
-            }
-        })
+    --------------------------------------------------------------------
+    -- 4.  Helper callbacks (unchanged)
+    --------------------------------------------------------------------
+    local function get_venv()
+      local venv = vim.env.VIRTUAL_ENV
+      return venv and venv:match('([^/]+)$') or nil
     end
+
+    local function filetype_with_venv()
+      local ft = vim.bo.filetype
+      local venv = get_venv()
+      if venv and ft == 'python' then
+        return '%#LualinePythonIcon# %* venv: ' .. venv
+      end
+      return ft
+    end
+
+    local function copilot_status()
+      local path = vim.fn.stdpath('data') .. '/copilot_state'
+      local f = io.open(path, 'r')
+      if f then
+        local s = f:read('*a'); f:close()
+        return (s == '1') and ': on' or ': off'
+      end
+      return 'Copilot: on'
+    end
+
+    local function diagnostic_status()
+      local path = vim.fn.stdpath('data') .. '/diagnostic_state'
+      local f = io.open(path, 'r')
+      if f then
+        local s = f:read('*a'); f:close()
+        return (s == '1') and '󱖫: on' or '󱖫: off'
+      end
+      return 'Diag: '
+    end
+
+    --------------------------------------------------------------------
+    -- 5.  Lualine setup
+    --------------------------------------------------------------------
+    require('lualine').setup({
+      options = {
+        theme               = borek_theme,
+        component_separators = '',
+        section_separators   = { left = '', right = '' },
+      },
+      sections = {
+        lualine_x = {
+          'encoding',
+          'fileformat',
+          copilot_status,
+          diagnostic_status,
+          filetype_with_venv,
+        },
+      },
+    })
+  end,
 }
