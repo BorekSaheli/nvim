@@ -82,9 +82,9 @@ return {
       local f = io.open(path, 'r')
       if f then
         local s = f:read('*a'); f:close()
-        return (s == '1') and ': on' or ': off'
+        return (s == '1') and '' or ''
       end
-      return 'Copilot: on'
+      return ''
     end
 
     local function diagnostic_status()
@@ -92,9 +92,9 @@ return {
       local f = io.open(path, 'r')
       if f then
         local s = f:read('*a'); f:close()
-        return (s == '1') and '󱖫: on' or '󱖫: off'
+        return (s == '1') and '󱖫  on' or '󱖫 off'
       end
-      return 'Diag: '
+      return '󱖫  on'
     end
 
     --------------------------------------------------------------------
