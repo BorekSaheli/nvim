@@ -1,4 +1,3 @@
-
 # My personal nvim config
 
 Currently optimized for Arch on wsl in Windows terminal or Wezterm
@@ -32,5 +31,5 @@ git clone https://github.com/BorekSaheli/nvim.git ~/.config/nvim
 ```bash
 sudo pacman -S xclip
 sudo pacman -S xsel
-
 ```
+
