@@ -19,22 +19,20 @@ vim.opt.relativenumber = true
 --     end,
 --     desc = "Auto format Python files on save",
 -- })
-vim.keymap.set('n', '<F5>', ':w<CR>:aboveleft split term://python %<CR>:startinsert<CR>:normal! G<CR>', {
-    desc = "Run current Python file in top horizontal split and auto-scroll to end"
+vim.keymap.set("n", "<F5>", ":w<CR>:aboveleft split term://python %<CR>:startinsert<CR>:normal! G<CR>", {
+	desc = "Run current Python file in top horizontal split and auto-scroll to end",
 })
-
 
 -- column options
 vim.opt.signcolumn = "yes"
 
 -- Disable Ctrl+Z motion
-vim.opt.backup = false  -- Prevents creating a backup file
-vim.keymap.set('n', '<C-z>', '<Nop>', { desc = "Disable Ctrl+Z" })  -- Disable Ctrl+Z
+vim.opt.backup = false -- Prevents creating a backup file
+vim.keymap.set("n", "<C-z>", "<Nop>", { desc = "Disable Ctrl+Z" }) -- Disable Ctrl+Z
 
 -- save file on leader leader
-vim.keymap.set('n', '<leader><leader>', ':w<CR>', { desc = "Save file" })
+vim.keymap.set("n", "<leader><leader>", ":w<CR>", { desc = "Save file" })
 
 -- -- Comment/uncomment current line or selected text
 -- vim.keymap.set('n', '<leader>c', '<Plug>(comment_toggle_linewise_current)', { desc = "Comment/uncomment current line" })
 -- vim.keymap.set('x', '<leader>c', '<Plug>(comment_toggle_linewise_visual)', { desc = "Comment/uncomment selected text" })
-
