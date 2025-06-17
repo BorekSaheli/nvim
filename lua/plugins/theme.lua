@@ -1,4 +1,4 @@
--- Theme: Pop N Lock Modified (Catppuccin base)
+-- Theme: Pop N Lock Modified (Catppuccin base)--
 return {
        "catppuccin/nvim",
        name = "pop-n-lock",
@@ -102,7 +102,7 @@ return {
 		})
 
 		-- Set the font if using a Neovim GUI
-		vim.opt.guifont = "Consolas:h12"
+		vim.opt.guifont = "JetBrainsMono Nerd Font Mono:h12"
 
 		vim.cmd.colorscheme("catppuccin")
 
