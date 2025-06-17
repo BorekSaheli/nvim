@@ -1,8 +1,9 @@
 return {
 	{ "tpope/vim-fugitive" },
-	{
-		"lewis6991/gitsigns.nvim",
-		opts = {
+        {
+                "lewis6991/gitsigns.nvim",
+                version = "v1.0.0",
+                opts = {
 			signs = {
 				add = { text = "┃" },
 				change = { text = "┃" },
