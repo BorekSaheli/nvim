@@ -5,7 +5,6 @@ return {
 		"nvim-lua/plenary.nvim",
 		"nvim-tree/nvim-web-devicons",
 		"MunifTanjim/nui.nvim",
-		-- "3rd/image.nvim",
 	},
 	keys = {
 		{ "<C-n>", ":Neotree toggle<CR>", desc = "Toggle Neo-tree" },

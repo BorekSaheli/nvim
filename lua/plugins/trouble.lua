@@ -8,32 +8,32 @@ return {
 		{
 			"<leader>xx",
 			cmd("Trouble diagnostics toggle focus=true win.position=bottom filter.buf=0"),
-			desc = "toggle (current buffer)",
+			desc = "Toggle Diagnostics (Current Buffer)",
 		},
 		{
 			"<leader>xs",
 			cmd("Trouble symbols toggle focus=true"),
-			desc = "[s]ymbols toggle",
+			desc = "Toggle Symbols",
 		},
 		{
 			"<leader>xl",
 			cmd("Trouble lsp toggle focus=false win.position=right"),
-			desc = "[l]sp toggle",
+			desc = "Toggle LSP Trouble",
 		},
 		{
 			"<leader>xn",
 			vim.diagnostic.goto_next,
-			desc = "goto [n]ext diagnostic",
+			desc = "Go to Next Diagnostic",
 		},
 		{
 			"<leader>xp",
 			vim.diagnostic.goto_prev,
-			desc = "goto [p]rev diagnostic",
+			desc = "Go to Previous Diagnostic",
 		},
 		{
 			"<leader>xq",
 			"<cmd>Trouble qflist toggle<cr>",
-			desc = "Quickfix List (Trouble)",
+			desc = "Toggle Quickfix List",
 		},
 	},
 }

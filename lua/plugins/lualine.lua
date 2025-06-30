@@ -2,6 +2,8 @@ return {
 	"nvim-lualine/lualine.nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
+		local state = require("core.state")
+
 		-- Borek colour palette (taken from borektheme.omp.json)
 		local colors = {
 			base = "#000000",
@@ -70,25 +72,11 @@ return {
 		end
 
 		local function copilot_status()
-			local path = vim.fn.stdpath("data") .. "/copilot_state"
-			local f = io.open(path, "r")
-			if f then
-				local s = f:read("*a")
-				f:close()
-				return (s == "1") and "" or ""
-			end
-			return ""
+			return state.copilot.is_enabled() and "" or ""
 		end
 
 		local function diagnostic_status()
-			local path = vim.fn.stdpath("data") .. "/diagnostic_state"
-			local f = io.open(path, "r")
-			if f then
-				local s = f:read("*a")
-				f:close()
-				return (s == "1") and "󱖫  on" or "󱖫 off"
-			end
-			return "󱖫  on"
+			return state.diagnostics.is_enabled() and "󱖫  on" or "󱖫 off"
 		end
 
 		-- Lualine setup

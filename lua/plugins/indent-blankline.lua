@@ -18,7 +18,7 @@ return {
 	},
 	main = "ibl",
 	keys = {
-		{ "<leader>ii", "<cmd>IndentBlanklineToggle<cr>", desc = "[i]ndent toggle" },
-		{ "<leader>is", "<cmd>IndentBlanklineScopeToggle<cr>", desc = "[s]cope toggle" },
+		{ "<leader>ii", "<cmd>IndentBlanklineToggle<cr>", desc = "Toggle Indent Lines" },
+		{ "<leader>is", "<cmd>IndentBlanklineScopeToggle<cr>", desc = "Toggle Indent Scope" },
 	},
 }

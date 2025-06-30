@@ -13,12 +13,12 @@ return {
 		"nvim-telescope/telescope-ui-select.nvim",
 	},
 	keys = {
-		{ "<leader>fp", "<cmd>Telescope builtin<cr>", desc = "Builtin [p]ickers" },
-		{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "[f]iles" },
-		{ "<leader>fF", "<cmd>Telescope find_files hidden=true<cr>", desc = "hidden [F]iles" },
-		{ "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live [g]rep" },
-		{ "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "[b]uffers" },
-		{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "[h]elp tags" },
+		{ "<leader>fp", "<cmd>Telescope builtin<cr>", desc = "Builtin Pickers" },
+		{ "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find Files" },
+		{ "<leader>fF", "<cmd>Telescope find_files hidden=true<cr>", desc = "Find Hidden Files" },
+		{ "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live Grep" },
+		{ "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "List Buffers" },
+		{ "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help Tags" },
 	},
 	config = function(_, opts)
 		local telescope = require("telescope")

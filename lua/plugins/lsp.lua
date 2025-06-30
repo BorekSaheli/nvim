@@ -35,23 +35,7 @@ return {
 				capabilities = capabilities,
 			})
 
-			-- Configure diagnostics
-			vim.diagnostic.config({
-				virtual_text = {
-					prefix = "●", -- Use a simple prefix for virtual text
-				},
-				signs = true,
-				underline = true,
-				update_in_insert = false,
-				severity_sort = true,
-			})
-
-			-- Define custom diagnostic signs
-			local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-			for type, icon in pairs(signs) do
-				local hl = "DiagnosticSign" .. type
-				vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-			end
+			
 
 			-- Keymaps for LSP actions
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "Show Hover Information" })

@@ -1,66 +1,33 @@
--- Define diagnostic state functions and variable outside config for accessibility
-local diagnostic_enabled = true
-
-local function save_diagnostic_state(state)
-	local file = io.open(vim.fn.stdpath("data") .. "/diagnostic_state", "w")
-	if file then
-		file:write(state and "1" or "0")
-		file:close()
-	end
-end
-
-local function load_diagnostic_state()
-	local file = io.open(vim.fn.stdpath("data") .. "/diagnostic_state", "r")
-	if file then
-		local state = file:read("*a")
-		file:close()
-		return state == "1"
-	end
-	return true -- Default to enabled if no saved state
-end
-
 return {
 	"folke/which-key.nvim",
 	event = "VeryLazy",
 	enabled = true,
-	opts = {
-		-- Add configuration options here if needed
-	},
-	keys = {
-		{
-			"<F10>",
-			function()
-				diagnostic_enabled = not diagnostic_enabled
-				if diagnostic_enabled then
-					vim.diagnostic.show() -- Changed from enable()
-				else
-					vim.diagnostic.hide() -- Changed from disable()
-				end
-				save_diagnostic_state(diagnostic_enabled)
-			end,
-			desc = "[d]iagnostic toggle",
-		},
-		{
-			"<leader>?",
-			function()
-				require("which-key").show({ global = false })
-			end,
-			desc = "Buffer Local Keymaps (which-key)",
-		},
-	},
 	config = function()
-		local wk = require("which-key")
+		local which_key = require("which-key")
+		local state = require("core.state")
 
-		-- Initialize diagnostics based on saved state
-		diagnostic_enabled = load_diagnostic_state()
+		-- Set the initial state for diagnostics
+		state.diagnostics.set_initial_state("lua vim.diagnostic.show()", "lua vim.diagnostic.hide()")
 
-		-- Apply the saved state when Neovim starts
-		vim.defer_fn(function()
-			if diagnostic_enabled then
-				vim.diagnostic.show() -- Changed from enable()
-			else
-				vim.diagnostic.hide() -- Changed from disable()
-			end
-		end, 100)
+		-- Register a keymap to toggle diagnostics
+		which_key.register({
+			["<F10>"] = {
+				function()
+					local is_enabled = state.diagnostics.toggle()
+					if is_enabled then
+						vim.diagnostic.show()
+					else
+						vim.diagnostic.hide()
+					end
+				end,
+				"Toggle Diagnostics",
+			},
+			["<leader>?"] = {
+				function()
+					which_key.show({ global = false })
+				end,
+				"Buffer Local Keymaps",
+			},
+		})
 	end,
 }
