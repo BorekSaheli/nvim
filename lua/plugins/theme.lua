@@ -25,7 +25,13 @@ return {
 				types = {},
 			},
 			color_overrides = { all = golden_haze.colors },
-			highlight_overrides = { mocha = golden_haze.highlights },
+			highlight_overrides = {
+				mocha = function(colors)
+					local highlights = golden_haze.highlights(colors)
+					highlights.DashboardHeader = { fg = "#2db557" }
+					return highlights
+				end,
+			},
 		})
 
 		vim.opt.guifont = "JetBrainsMono Nerd Font Mono:h12"
