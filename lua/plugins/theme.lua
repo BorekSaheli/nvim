@@ -3,7 +3,7 @@ return {
 	name = "catppuccin",
 	config = function()
 		vim.o.termguicolors = true
-		local golden_haze = require("theme.golden-haze-2")
+		local golden_haze = require("theme.custom-pop-n-lock")
 
 		require("catppuccin").setup({
 			flavour = "mocha",
