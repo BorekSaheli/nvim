@@ -10,8 +10,9 @@ return {
 		state.diagnostics.set_initial_state("lua vim.diagnostic.show()", "lua vim.diagnostic.hide()")
 
 		-- Register a keymap to toggle diagnostics
-		which_key.register({
-			["<F10>"] = {
+		which_key.add({
+			{
+				"<F10>",
 				function()
 					local is_enabled = state.diagnostics.toggle()
 					if is_enabled then
@@ -20,13 +21,14 @@ return {
 						vim.diagnostic.hide()
 					end
 				end,
-				"Toggle Diagnostics",
+				desc = "Toggle Diagnostics",
 			},
-			["<leader>?"] = {
+			{
+				"<leader>?",
 				function()
 					which_key.show({ global = false })
 				end,
-				"Buffer Local Keymaps",
+				desc = "Buffer Local Keymaps",
 			},
 		})
 	end,
