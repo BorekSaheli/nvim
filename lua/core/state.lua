@@ -43,8 +43,9 @@ function M.create_toggle(name, default_state)
 	}
 end
 
--- Create toggles for Copilot and Diagnostics
+-- Create toggles for Copilot, Diagnostics, and Completion Borders
 M.copilot = M.create_toggle("copilot", true)
 M.diagnostics = M.create_toggle("diagnostics", true)
+M.completion_borders = M.create_toggle("completion_borders", true)
 
 return M

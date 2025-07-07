@@ -36,3 +36,11 @@ vim.keymap.set("n", "<leader><leader>", ":w<CR>", { desc = "Save file" })
 -- -- Comment/uncomment current line or selected text
 -- vim.keymap.set('n', '<leader>c', '<Plug>(comment_toggle_linewise_current)', { desc = "Comment/uncomment current line" })
 -- vim.keymap.set('x', '<leader>c', '<Plug>(comment_toggle_linewise_visual)', { desc = "Comment/uncomment selected text" })
+
+-- Windows-specific: Exclude problematic directories from file watching
+if vim.fn.has("win32") == 1 then
+	vim.opt.fsync = false
+	-- Disable file watching for Windows system directories that cause EPERM errors
+	vim.g.loaded_netrwPlugin = 1
+	vim.g.loaded_netrw = 1
+end

@@ -79,6 +79,10 @@ return {
 			return state.diagnostics.is_enabled() and "󱖫  on" or "󱖫 off"
 		end
 
+		local function completion_borders_status()
+			return state.completion_borders.is_enabled() and "󰍉  on" or "󰍉 off"
+		end
+
 		-- Lualine setup
 		require("lualine").setup({
 			options = {
@@ -92,6 +96,7 @@ return {
 					"fileformat",
 					copilot_status,
 					diagnostic_status,
+					completion_borders_status,
 					filetype_with_venv,
 				},
 			},

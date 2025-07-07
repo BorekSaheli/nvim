@@ -24,6 +24,8 @@ require("lazy").setup({
 	spec = {
 		-- import your plugins
 		{ import = "plugins" },
+		-- import core configurations
+		{ import = "core.mason" },
 	},
 	change_detection = { enabled = false },
 })
