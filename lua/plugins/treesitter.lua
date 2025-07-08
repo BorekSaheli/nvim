@@ -1,6 +1,7 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
+		enabled = true,
 		build = ":TSUpdate",
 		main = "nvim-treesitter.configs",
 		opts = {
@@ -23,6 +24,7 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
+		enabled = false,
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 		main = "nvim-treesitter.configs",
 		opts = {

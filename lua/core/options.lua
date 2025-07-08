@@ -43,4 +43,12 @@ if vim.fn.has("win32") == 1 then
 	-- Disable file watching for Windows system directories that cause EPERM errors
 	vim.g.loaded_netrwPlugin = 1
 	vim.g.loaded_netrw = 1
+	
+	-- Additional Windows LSP performance optimizations
+	vim.opt.updatetime = 250  -- Faster update time for better LSP experience
+	vim.opt.timeoutlen = 300  -- Faster which-key popup
 end
+
+-- LSP Performance optimizations
+vim.opt.updatetime = 250  -- Reduce update time for better LSP experience
+vim.opt.completeopt = { "menu", "menuone", "noselect" }  -- Better completion experience

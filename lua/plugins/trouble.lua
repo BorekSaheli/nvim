@@ -2,6 +2,7 @@ local cmd = require("utils").cmd
 
 return {
 	"folke/trouble.nvim",
+	enabled = true,
 	opts = {},
 	cmd = "Trouble",
 	keys = {

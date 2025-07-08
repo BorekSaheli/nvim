@@ -34,7 +34,7 @@ return {
 			},
 		})
 
-		vim.opt.guifont = "JetBrainsMono Nerd Font Mono:h12"
+		vim.opt.guifont = "JetBrainsMonoNL Nerd Font:h12"
 		vim.cmd.colorscheme("catppuccin")
 
 		-- Simulate darker background for line numbers and diagnostic column

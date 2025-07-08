@@ -1,8 +1,12 @@
 return {
-	{ "tpope/vim-fugitive" },
+	{
+		"tpope/vim-fugitive",
+		enabled = true, -- Add enabled property
+	},
 	{
 		"lewis6991/gitsigns.nvim",
 		version = "v1.0.0",
+		enabled = true, -- Add enabled property
 		opts = {
 			signs = {
 				add = { text = "┃" },
