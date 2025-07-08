@@ -24,7 +24,7 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
-		enabled = false,
+		enabled = true,
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 		main = "nvim-treesitter.configs",
 		opts = {
