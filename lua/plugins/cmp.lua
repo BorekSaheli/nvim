@@ -15,6 +15,25 @@ return {
 			local luasnip = require("luasnip")
 			local state = require("core.state")
 
+			-- Track LSP status
+			local lsp_ready = false
+			
+			-- Function to check if any LSP clients are attached
+			local function check_lsp_status()
+				local clients = vim.lsp.get_active_clients({ bufnr = 0 })
+				local has_lsp = #clients > 0
+				
+				if has_lsp and not lsp_ready then
+					lsp_ready = true
+					vim.notify("LSP completions ready!", vim.log.levels.INFO)
+				elseif not has_lsp and lsp_ready then
+					lsp_ready = false
+					vim.notify("LSP disconnected", vim.log.levels.WARN)
+				end
+				
+				return has_lsp
+			end
+
 			-- Setup completion
 			cmp.setup({
 				snippet = {
@@ -48,12 +67,19 @@ return {
 					end, { "i", "s" }),
 				}),
 				sources = cmp.config.sources({
-					{ name = "nvim_lsp" },
-					{ name = "luasnip" },
-				}, {
-					{ name = "buffer" },
-					{ name = "path" },
+					{ 
+						name = "nvim_lsp",
+						priority = 1000,
+					},
 				}),
+				performance = {
+					debounce = 60,
+					throttle = 30,
+					fetching_timeout = 500,
+				},
+				completion = {
+					completeopt = "menu,menuone,noselect",
+				},
 				window = {
 					completion = cmp.config.window.bordered(),
 					documentation = cmp.config.window.bordered(),
@@ -90,51 +116,84 @@ return {
 						}
 
 						vim_item.kind = string.format("%s %s", icons[vim_item.kind] or "", vim_item.kind)
-						vim_item.menu = ({
-							nvim_lsp = "[LSP]",
-							luasnip = "[LuaSnip]",
-							buffer = "[Buffer]",
-							path = "[Path]",
-						})[entry.source.name]
+						
+						-- More distinctive source labels
+						local source_names = {
+							nvim_lsp = "󰒋 LSP",
+						}
+						
+						vim_item.menu = source_names[entry.source.name] or "[" .. entry.source.name .. "]"
+						
+						-- Limit text width for better display
+						if string.len(vim_item.abbr) > 40 then
+							vim_item.abbr = string.sub(vim_item.abbr, 1, 37) .. "..."
+						end
 
 						return vim_item
 					end,
 				},
 			})
 
-			-- Function to toggle completion borders by disabling/enabling completion
-			local function toggle_completion()
+			-- LSP event handlers for debugging
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					if client then
+						vim.notify(string.format("LSP attached: %s", client.name), vim.log.levels.INFO)
+						lsp_ready = true
+					end
+				end,
+			})
+
+			vim.api.nvim_create_autocmd("LspDetach", {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					if client then
+						vim.notify(string.format("LSP detached: %s", client.name), vim.log.levels.WARN)
+						-- Check if any other LSP clients are still attached
+						vim.defer_fn(function()
+							check_lsp_status()
+						end, 100)
+					end
+				end,
+			})
+
+			-- Function to toggle completion borders without affecting core functionality
+			local function toggle_completion_borders()
 				local is_enabled = state.completion_borders.is_enabled()
 				
 				if is_enabled then
-					-- Enable completion with borders
-					cmp.setup({
-						enabled = true,
+					-- Show borders
+					cmp.setup.buffer({
 						window = {
 							completion = cmp.config.window.bordered(),
 							documentation = cmp.config.window.bordered(),
 						},
 					})
 				else
-					-- Disable completion entirely
-					cmp.setup({
-						enabled = false,
+					-- Hide borders
+					cmp.setup.buffer({
+						window = {
+							completion = cmp.config.window.bordered({
+								border = "none",
+								winhighlight = "Normal:Normal,FloatBorder:Normal,CursorLine:Visual,Search:None",
+							}),
+							documentation = cmp.config.window.bordered({
+								border = "none",
+								winhighlight = "Normal:Normal,FloatBorder:Normal,CursorLine:Visual,Search:None",
+							}),
+						},
 					})
 				end
 			end
 
-			-- Set initial state
-			vim.defer_fn(function()
-				toggle_completion()
-			end, 100)
-
-			-- F8 keymap to toggle completion
+			-- F8 keymap to toggle completion borders only
 			vim.keymap.set("n", "<F8>", function()
 				state.completion_borders.toggle()
-				toggle_completion()
+				toggle_completion_borders()
 				local status = state.completion_borders.is_enabled() and "enabled" or "disabled"
-				vim.notify("Completion " .. status, vim.log.levels.INFO)
-			end, { desc = "Toggle Completion" })
+				vim.notify("Completion borders " .. status, vim.log.levels.INFO)
+			end, { desc = "Toggle Completion Borders" })
 		end,
 	},
 }

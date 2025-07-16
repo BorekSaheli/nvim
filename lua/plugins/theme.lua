@@ -3,7 +3,7 @@ return {
 	name = "catppuccin",
 	config = function()
 		vim.o.termguicolors = true
-		local golden_haze = require("theme.custom-pop-n-lock")
+			   local golden_haze = require("theme.custom-pop-n-lock")
 
 		require("catppuccin").setup({
 			flavour = "mocha",
@@ -27,7 +27,8 @@ return {
 			color_overrides = { all = golden_haze.colors },
 			highlight_overrides = {
 				mocha = function(colors)
-					local highlights = golden_haze.highlights(colors)
+				   local highlights = golden_haze and golden_haze.highlights and golden_haze.highlights(colors) or {}
+				   local highlights = {}
 					highlights.DashboardHeader = { fg = "#2db557" }
 					return highlights
 				end,
