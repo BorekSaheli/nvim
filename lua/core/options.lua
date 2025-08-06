@@ -52,3 +52,7 @@ end
 -- LSP Performance optimizations
 vim.opt.updatetime = 250  -- Reduce update time for better LSP experience
 vim.opt.completeopt = { "menu", "menuone", "noselect" }  -- Better completion experience
+
+-- Center screen after half-page movements
+vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Half page down and center" })
+vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Half page up and center" })

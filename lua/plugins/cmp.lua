@@ -36,6 +36,9 @@ return {
 
 			-- Setup completion
 			cmp.setup({
+				enabled = function()
+					return _G.COMPLETION_ENABLED
+				end,
 				snippet = {
 					expand = function(args)
 						luasnip.lsp_expand(args.body)
@@ -158,42 +161,6 @@ return {
 				end,
 			})
 
-			-- Function to toggle completion borders without affecting core functionality
-			local function toggle_completion_borders()
-				local is_enabled = state.completion_borders.is_enabled()
-				
-				if is_enabled then
-					-- Show borders
-					cmp.setup.buffer({
-						window = {
-							completion = cmp.config.window.bordered(),
-							documentation = cmp.config.window.bordered(),
-						},
-					})
-				else
-					-- Hide borders
-					cmp.setup.buffer({
-						window = {
-							completion = cmp.config.window.bordered({
-								border = "none",
-								winhighlight = "Normal:Normal,FloatBorder:Normal,CursorLine:Visual,Search:None",
-							}),
-							documentation = cmp.config.window.bordered({
-								border = "none",
-								winhighlight = "Normal:Normal,FloatBorder:Normal,CursorLine:Visual,Search:None",
-							}),
-						},
-					})
-				end
-			end
-
-			-- F8 keymap to toggle completion borders only
-			vim.keymap.set("n", "<F8>", function()
-				state.completion_borders.toggle()
-				toggle_completion_borders()
-				local status = state.completion_borders.is_enabled() and "enabled" or "disabled"
-				vim.notify("Completion borders " .. status, vim.log.levels.INFO)
-			end, { desc = "Toggle Completion Borders" })
 		end,
 	},
 }

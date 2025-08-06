@@ -59,28 +59,45 @@ return {
 		-- Helper callbacks
 		local function get_venv()
 			local venv = vim.env.VIRTUAL_ENV
-			return venv and venv:match("([^/]+)$") or nil
+			if not venv then
+				return nil
+			end
+			
+			-- Extract venv name (works for both Windows and Unix paths)
+			local venv_name = venv:match("([^/\\]+)$")
+			return venv_name
+		end
+
+		local function get_python_version()
+			local handle = io.popen("python --version 2>&1")
+			if handle then
+				local result = handle:read("*a")
+				handle:close()
+				local version = result:match("Python (%d+%.%d+%.%d+)")
+				return version
+			end
+			return nil
 		end
 
 		local function filetype_with_venv()
 			local ft = vim.bo.filetype
 			local venv = get_venv()
 			if venv and ft == "python" then
-				return "%#LualinePythonIcon# %* venv: " .. venv
+				return "%#LualinePythonIcon# %* " .. venv .. " " .. (get_python_version() or "")
 			end
 			return ft
 		end
 
 		local function copilot_status()
-			return state.copilot.is_enabled() and "" or ""
+			return _G.COPILOT_ENABLED and "" or ""
 		end
 
 		local function diagnostic_status()
-			return state.diagnostics.is_enabled() and "󱖫  on" or "󱖫 off"
+			return _G.DIAGNOSTICS_ENABLED and "󱖫  on" or "󱖫 off"
 		end
 
-		local function completion_borders_status()
-			return state.completion_borders.is_enabled() and "󰍉  on" or "󰍉 off"
+		local function completion_status()
+			return _G.COMPLETION_ENABLED and "󰍉  on" or "󰍉 off"
 		end
 
 		-- Lualine setup
@@ -96,7 +113,7 @@ return {
 					"fileformat",
 					copilot_status,
 					diagnostic_status,
-					completion_borders_status,
+					completion_status,
 					filetype_with_venv,
 				},
 			},

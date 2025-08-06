@@ -60,59 +60,17 @@ return {
 		config = function(_, opts)
 			require("mason-lspconfig").setup(opts)
 
-			-- Disable default vim diagnostics immediately
+			-- Set up float config for diagnostics
 			vim.diagnostic.config({
-				virtual_text = false,
-				signs = false,
-				underline = false,
-				update_in_insert = false,
+				float = {
+					focusable = false,
+					style = "minimal",
+					border = "rounded",
+					source = "always", -- Always show source in float
+					header = "",
+					prefix = "",
+				},
 			})
-
-			-- Global diagnostic state
-			local diagnostic_enabled = true
-			
-			-- Configure diagnostics for better performance and visibility
-			local function setup_diagnostics()
-				vim.diagnostic.config({
-					virtual_text = diagnostic_enabled and {
-						enabled = true,
-						source = "always", -- Always show source (ruff, pyright, etc.)
-						prefix = "●",
-					} or false,
-					signs = diagnostic_enabled,
-					underline = diagnostic_enabled,
-					update_in_insert = false, -- Don't update diagnostics in insert mode for performance
-					severity_sort = true,
-					float = {
-						focusable = false,
-						style = "minimal",
-						border = "rounded",
-						source = "always", -- Always show source in float
-						header = "",
-						prefix = "",
-					},
-				})
-			end
-			
-			-- Function to toggle diagnostics
-			local function toggle_diagnostics()
-				diagnostic_enabled = not diagnostic_enabled
-				setup_diagnostics()
-				
-				if diagnostic_enabled then
-					vim.diagnostic.show()
-					vim.notify("Diagnostics enabled", vim.log.levels.INFO)
-				else
-					vim.diagnostic.hide()
-					vim.notify("Diagnostics disabled", vim.log.levels.INFO)
-				end
-			end
-			
-			-- Set up initial diagnostics
-			setup_diagnostics()
-			
-			-- Global keymap to toggle diagnostics
-			vim.keymap.set("n", "<leader>td", toggle_diagnostics, { desc = "Toggle Diagnostics" })
 
 			-- Define signs
 			local signs = {
@@ -205,12 +163,6 @@ return {
 							-- Performance: disable semantic tokens for faster highlighting
 							client.server_capabilities.semanticTokensProvider = nil
 							
-							-- Only enable diagnostics when LSP servers attach (not default vim diagnostics)
-							if diagnostic_enabled then
-								setup_diagnostics() -- Re-enable with LSP sources
-							else
-								vim.diagnostic.hide(bufnr)
-							end
 							
 							-- LSP Keymaps (only apply to buffers with LSP)
 							local opts = { buffer = bufnr, silent = true }

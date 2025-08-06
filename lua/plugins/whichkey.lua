@@ -6,20 +6,29 @@ return {
 		local which_key = require("which-key")
 		local state = require("core.state")
 
-		-- Set the initial state for diagnostics
-		state.diagnostics.set_initial_state("lua vim.diagnostic.show()", "lua vim.diagnostic.hide()")
-
-		-- Register a keymap to toggle diagnostics
+		-- Register keymaps for toggles
 		which_key.add({
+			{
+				"<F9>",
+				function()
+					local is_enabled = state.toggle_diagnostics()
+					vim.notify(is_enabled and "Diagnostics enabled" or "Diagnostics disabled", vim.log.levels.INFO)
+				end,
+				desc = "Toggle Diagnostics",
+			},
 			{
 				"<F10>",
 				function()
-					local is_enabled = state.diagnostics.toggle()
-					if is_enabled then
-						vim.diagnostic.show()
-					else
-						vim.diagnostic.hide()
-					end
+					local is_enabled = state.toggle_completion()
+					vim.notify(is_enabled and "Completion popup enabled" or "Completion popup disabled", vim.log.levels.INFO)
+				end,
+				desc = "Toggle Completion Popup",
+			},
+			{
+				"<leader>td",
+				function()
+					local is_enabled = state.toggle_diagnostics()
+					vim.notify(is_enabled and "Diagnostics enabled" or "Diagnostics disabled", vim.log.levels.INFO)
 				end,
 				desc = "Toggle Diagnostics",
 			},
