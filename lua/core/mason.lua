@@ -60,7 +60,7 @@ return {
 		config = function(_, opts)
 			require("mason-lspconfig").setup(opts)
 
-			-- Set up float config for diagnostics
+			-- Set up diagnostic configuration with signs and float
 			vim.diagnostic.config({
 				float = {
 					focusable = false,
@@ -70,19 +70,15 @@ return {
 					header = "",
 					prefix = "",
 				},
+				signs = {
+					text = {
+						[vim.diagnostic.severity.ERROR] = "",
+						[vim.diagnostic.severity.WARN] = "⚠",
+						[vim.diagnostic.severity.HINT] = "󰌶",
+						[vim.diagnostic.severity.INFO] = "",
+					},
+				},
 			})
-
-			-- Define signs
-			local signs = {
-				{ name = "DiagnosticSignError", text = "" },
-				{ name = "DiagnosticSignWarn", text = "" },
-				{ name = "DiagnosticSignHint", text = "󰌶" },
-				{ name = "DiagnosticSignInfo", text = "" },
-			}
-
-			for _, sign in ipairs(signs) do
-				vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
-			end
 
 			-- Setup handlers for automatic server configuration
 			require("mason-lspconfig").setup_handlers({
@@ -123,7 +119,7 @@ return {
 											return true
 										end, result.diagnostics)
 									end
-									vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+									vim.lsp.handlers["textDocument/publishDiagnostics"](err, result, ctx, config)
 								end,
 							},
 						}
@@ -134,11 +130,42 @@ return {
 									runtime = { version = "LuaJIT" },
 									workspace = {
 										checkThirdParty = false,
+										maxPreload = 100000,
+										preloadFileSize = 10000,
 										library = {
 											vim.env.VIMRUNTIME,
 											-- Add lazy.nvim to the library
 											"${3rd}/luv/library",
 											"${3rd}/busted/library",
+										},
+										-- Exclude directories that shouldn't be scanned
+										ignoreDir = {
+											".git",
+											"node_modules",
+											".vscode",
+											".idea",
+											"dist",
+											"build",
+											".next",
+											".nuxt",
+											".output",
+											".venv",
+											"venv",
+											"env",
+											"__pycache__",
+											".pytest_cache",
+											".mypy_cache",
+											"AppData/Local/Temp",
+											"AppData/Roaming",
+											"AppData/LocalLow",
+											"scoop",
+											"tools",
+											"Downloads",
+											"Documents",
+											"Desktop",
+											"Pictures",
+											"Music",
+											"Videos",
 										},
 									},
 									completion = {
