@@ -52,10 +52,10 @@ header = {
 				-- { desc = "Settings", group = "Label", action = "e ~/.config/nvim/lua/plugins/dashboard.lua", key = "s", icon = "⚙️" },
 			},
 
-			footer = {
-        "",
-        "____",
-        "",
-		},
+                        footer = {
+                                "",
+                                vim.fs.normalize(vim.fn.getcwd()),
+                                "",
+                        },
 	},
 }}

@@ -39,14 +39,17 @@ vim.keymap.set("n", "<leader><leader>", ":w<CR>", { desc = "Save file" })
 
 -- Windows-specific: Exclude problematic directories from file watching
 if vim.fn.has("win32") == 1 then
-	vim.opt.fsync = false
-	-- Disable file watching for Windows system directories that cause EPERM errors
-	vim.g.loaded_netrwPlugin = 1
-	vim.g.loaded_netrw = 1
-	
-	-- Additional Windows LSP performance optimizations
-	vim.opt.updatetime = 250  -- Faster update time for better LSP experience
-	vim.opt.timeoutlen = 300  -- Faster which-key popup
+        vim.opt.fsync = false
+        -- Disable file watching for Windows system directories that cause EPERM errors
+        vim.g.loaded_netrwPlugin = 1
+        vim.g.loaded_netrw = 1
+
+        -- Use forward slashes for paths
+        vim.opt.shellslash = true
+
+        -- Additional Windows LSP performance optimizations
+        vim.opt.updatetime = 250  -- Faster update time for better LSP experience
+        vim.opt.timeoutlen = 300  -- Faster which-key popup
 end
 
 -- LSP Performance optimizations
