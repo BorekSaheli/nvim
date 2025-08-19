@@ -11,9 +11,26 @@ return {
 		},
 		event = "InsertEnter",
 		config = function()
-			local cmp = require("cmp")
-			local luasnip = require("luasnip")
-			local state = require("core.state")
+                        local cmp = require("cmp")
+                        local luasnip = require("luasnip")
+
+                        -- User option to enable/disable LSP notifications
+                        if vim.g.cmp_lsp_notify == nil then
+                                vim.g.cmp_lsp_notify = true
+                        end
+
+                        -- Debounced notify helper
+                        local last_lsp_notify = 0
+                        local function notify_lsp(msg, level)
+                                if not vim.g.cmp_lsp_notify then
+                                        return
+                                end
+                                local now = vim.loop.now()
+                                if now - last_lsp_notify > 1000 then
+                                        vim.notify(msg, level)
+                                        last_lsp_notify = now
+                                end
+                        end
 
 			-- Track LSP status
 			local lsp_ready = false
@@ -23,13 +40,13 @@ return {
 				local clients = vim.lsp.get_active_clients({ bufnr = 0 })
 				local has_lsp = #clients > 0
 				
-				if has_lsp and not lsp_ready then
-					lsp_ready = true
-					vim.notify("LSP completions ready!", vim.log.levels.INFO)
-				elseif not has_lsp and lsp_ready then
-					lsp_ready = false
-					vim.notify("LSP disconnected", vim.log.levels.WARN)
-				end
+                                if has_lsp and not lsp_ready then
+                                        lsp_ready = true
+                                        notify_lsp("LSP completions ready!", vim.log.levels.INFO)
+                                elseif not has_lsp and lsp_ready then
+                                        lsp_ready = false
+                                        notify_lsp("LSP disconnected", vim.log.levels.WARN)
+                                end
 				
 				return has_lsp
 			end
@@ -141,23 +158,23 @@ return {
 			vim.api.nvim_create_autocmd("LspAttach", {
 				callback = function(args)
 					local client = vim.lsp.get_client_by_id(args.data.client_id)
-					if client then
-						vim.notify(string.format("LSP attached: %s", client.name), vim.log.levels.INFO)
-						lsp_ready = true
-					end
+                                        if client then
+                                                notify_lsp(string.format("LSP attached: %s", client.name), vim.log.levels.INFO)
+                                                lsp_ready = true
+                                        end
 				end,
 			})
 
 			vim.api.nvim_create_autocmd("LspDetach", {
 				callback = function(args)
 					local client = vim.lsp.get_client_by_id(args.data.client_id)
-					if client then
-						vim.notify(string.format("LSP detached: %s", client.name), vim.log.levels.WARN)
-						-- Check if any other LSP clients are still attached
-						vim.defer_fn(function()
-							check_lsp_status()
-						end, 100)
-					end
+                                        if client then
+                                                notify_lsp(string.format("LSP detached: %s", client.name), vim.log.levels.WARN)
+                                                -- Check if any other LSP clients are still attached
+                                                vim.defer_fn(function()
+                                                        check_lsp_status()
+                                                end, 100)
+                                        end
 				end,
 			})
 
