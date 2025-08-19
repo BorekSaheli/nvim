@@ -80,6 +80,36 @@ return {
 				},
 			})
 
+			local function goto_definition()
+				local params = vim.lsp.util.make_position_params()
+				vim.lsp.buf_request(0, "textDocument/definition", params, function(err, result, ctx, config)
+					if err or not result then
+						return
+					end
+					if not vim.tbl_islist(result) then
+						result = { result }
+					end
+					local filtered = {}
+					local seen = {}
+					for _, loc in ipairs(result) do
+						local uri = loc.uri or loc.targetUri
+						local range = loc.range or loc.targetRange
+						local fname = vim.fs.normalize(vim.uri_to_fname(uri))
+						local key = table.concat({ fname, range.start.line, range.start.character, range["end"].line, range["end"].character }, ":")
+						if not seen[key] then
+							seen[key] = true
+							if loc.uri then
+								loc.uri = vim.uri_from_fname(fname)
+							else
+								loc.targetUri = vim.uri_from_fname(fname)
+							end
+							table.insert(filtered, loc)
+						end
+					end
+					vim.lsp.handlers["textDocument/definition"](err, filtered, ctx, config)
+				end)
+			end
+			
 			-- Setup handlers for automatic server configuration
 			require("mason-lspconfig").setup_handlers({
 				-- Default handler for all servers
@@ -194,7 +224,7 @@ return {
 							-- LSP Keymaps (only apply to buffers with LSP)
 							local opts = { buffer = bufnr, silent = true }
 							vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Show Hover Information" }))
-							vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
+							vim.keymap.set("n", "gd", goto_definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
 							vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to Declaration" }))
 							vim.keymap.set("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Go to References" }))
 							vim.keymap.set("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to Implementation" }))
