@@ -10,13 +10,42 @@ return {
 			"saadparwaiz1/cmp_luasnip",
 		},
 		event = "InsertEnter",
-		config = function()
-			local cmp = require("cmp")
-			local luasnip = require("luasnip")
-			local state = require("core.state")
+                config = function()
+                        local cmp = require("cmp")
+                        local luasnip = require("luasnip")
+                        local state = require("core.state")
 
-			-- Track LSP status
-			local lsp_ready = false
+                       -- Kind icons
+                       local icons = {
+                               Text = "󰉿",
+                               Method = "󰆧",
+                               Function = "󰊕",
+                               Constructor = "",
+                               Field = "󰜢",
+                               Variable = "󰀫",
+                               Class = "󰠱",
+                               Interface = "",
+                               Module = "",
+                               Property = "󰜢",
+                               Unit = "󰑭",
+                               Value = "󰎠",
+                               Enum = "",
+                               Keyword = "󰌋",
+                               Snippet = "",
+                               Color = "󰏘",
+                               File = "󰈙",
+                               Reference = "󰈇",
+                               Folder = "󰉋",
+                               EnumMember = "",
+                               Constant = "󰏿",
+                               Struct = "󰙅",
+                               Event = "",
+                               Operator = "󰆕",
+                               TypeParameter = "",
+                       }
+
+                        -- Track LSP status
+                        local lsp_ready = false
 			
 			-- Function to check if any LSP clients are attached
 			local function check_lsp_status()
@@ -83,47 +112,19 @@ return {
 				completion = {
 					completeopt = "menu,menuone,noselect",
 				},
-				window = {
-					completion = cmp.config.window.bordered(),
-					documentation = cmp.config.window.bordered(),
-				},
-				formatting = {
-					format = function(entry, vim_item)
-						-- Kind icons
-						local icons = {
-							Text = "󰉿",
-							Method = "󰆧",
-							Function = "󰊕",
-							Constructor = "",
-							Field = "󰜢",
-							Variable = "󰀫",
-							Class = "󰠱",
-							Interface = "",
-							Module = "",
-							Property = "󰜢",
-							Unit = "󰑭",
-							Value = "󰎠",
-							Enum = "",
-							Keyword = "󰌋",
-							Snippet = "",
-							Color = "󰏘",
-							File = "󰈙",
-							Reference = "󰈇",
-							Folder = "󰉋",
-							EnumMember = "",
-							Constant = "󰏿",
-							Struct = "󰙅",
-							Event = "",
-							Operator = "󰆕",
-							TypeParameter = "",
-						}
+                                window = {
+                                        completion = cmp.config.window.bordered(),
+                                        documentation = cmp.config.window.bordered(),
+                                },
+                                formatting = {
+                                        format = function(entry, vim_item)
+                                               -- Kind icons
+                                               vim_item.kind = string.format("%s %s", icons[vim_item.kind] or "", vim_item.kind)
 
-						vim_item.kind = string.format("%s %s", icons[vim_item.kind] or "", vim_item.kind)
-						
-						-- More distinctive source labels
-						local source_names = {
-							nvim_lsp = "󰒋 LSP",
-						}
+                                                -- More distinctive source labels
+                                                local source_names = {
+                                                        nvim_lsp = "󰒋 LSP",
+                                                }
 						
 						vim_item.menu = source_names[entry.source.name] or "[" .. entry.source.name .. "]"
 						
