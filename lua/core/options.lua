@@ -12,16 +12,49 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 
 -- -- Auto format on save for Python files
--- vim.api.nvim_create_autocmd("BufWritePre", {
---     pattern = "*.py",
---     callback = function()
---         vim.lsp.buf.format({ async = false })
---     end,
---     desc = "Auto format Python files on save",
--- })
-vim.keymap.set("n", "<F5>", ":w<CR>:aboveleft split term://python %<CR>:startinsert<CR>:normal! G<CR>", {
-	desc = "Run current Python file in top horizontal split and auto-scroll to end",
-})
+
+--[[
+Run the current file with an appropriate interpreter.
+
+This uses `vim.fn.jobstart` to spawn a background job based on the buffer's
+`filetype`. Output is echoed to the command line. Add more filetypes to the
+`cmd_by_ft` table as needed.
+--]]
+local function run_current_file()
+        local filetype = vim.bo.filetype
+        local file = vim.fn.expand("%")
+
+        local cmd_by_ft = {
+                python = { "python", file },
+                lua = { "lua", file },
+                javascript = { "node", file },
+                typescript = { "node", file },
+                sh = { "bash", file },
+        }
+
+        local cmd = cmd_by_ft[filetype]
+        if not cmd then
+                vim.notify("No runner configured for filetype: " .. filetype, vim.log.levels.ERROR)
+                return
+        end
+
+        vim.fn.jobstart(cmd, {
+                stdout_buffered = true,
+                on_stdout = function(_, data)
+                        if data then
+                                vim.api.nvim_echo({ { table.concat(data, "\n") } }, false, {})
+                        end
+                end,
+                on_stderr = function(_, data)
+                        if data then
+                                vim.api.nvim_echo({ { table.concat(data, "\n"), "ErrorMsg" } }, false, {})
+                        end
+                end,
+        })
+end
+
+-- Mapping to run the current file using `run_current_file()`
+vim.keymap.set("n", "<leader>r", run_current_file, { desc = "Run current file" })
 
 -- column options
 vim.opt.signcolumn = "yes"
@@ -56,3 +89,4 @@ vim.opt.completeopt = { "menu", "menuone", "noselect" }  -- Better completion ex
 -- Center screen after half-page movements
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Half page down and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Half page up and center" })
+
