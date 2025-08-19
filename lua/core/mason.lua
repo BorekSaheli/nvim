@@ -12,11 +12,8 @@ return {
 				"lua-language-server", -- lua_ls
 
 				-- Formatters
-				"stylua",
-				"ruff",
-
-				-- Linters
-				"ruff", -- also used for linting
+                                "stylua",
+                                "ruff", -- also used for linting
 			},
 		},
 		config = function(_, opts)
@@ -33,13 +30,16 @@ return {
 			end)
 
 			-- Auto-install servers on startup if they're not installed
-			vim.defer_fn(function()
-				for _, tool in ipairs(opts.ensure_installed) do
-					if not mr.is_installed(tool) then
-						vim.cmd("MasonInstall " .. tool)
-					end
-				end
-			end, 100)
+                        vim.defer_fn(function()
+                                mr.refresh(function()
+                                        for _, tool in ipairs(opts.ensure_installed) do
+                                                local pkg = mr.get_package(tool)
+                                                if not pkg:is_installed() then
+                                                        pkg:install()
+                                                end
+                                        end
+                                end)
+                        end, 100)
 		end,
 	},
 	{
