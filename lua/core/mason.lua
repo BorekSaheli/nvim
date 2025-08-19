@@ -32,14 +32,14 @@ return {
 				end, 100)
 			end)
 
-			-- Auto-install servers on startup if they're not installed
-			vim.defer_fn(function()
-				for _, tool in ipairs(opts.ensure_installed) do
-					if not mr.is_installed(tool) then
-						vim.cmd("MasonInstall " .. tool)
-					end
-				end
-			end, 100)
+                        -- Auto-install servers removed; install tools manually or via CI
+                        -- vim.defer_fn(function()
+                        --         for _, tool in ipairs(opts.ensure_installed) do
+                        --                 if not mr.is_installed(tool) then
+                        --                         vim.cmd("MasonInstall " .. tool)
+                        --                 end
+                        --         end
+                        -- end, 100)
 		end,
 	},
 	{
