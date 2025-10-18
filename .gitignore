@@ -1,0 +1,12 @@
+# Claude Code directory
+.claude/
+
+# Lock files
+lazy-lock.json
+package-lock.json
+
+# Neovim plugin state
+plugin/
+
+# System files
+.DS_Store
