@@ -9,8 +9,9 @@ return {
 		},
 		event = { "BufReadPre", "BufNewFile" },
 		config = function()
-			-- Set up ty LSP (Astral's Python LSP)
+			-- Set up ty LSP (Astral's Python LSP) and ruff_lsp
 			-- Note: ty must be installed manually with: uv tool install ty
+			-- Note: ruff must be installed manually with: uv tool install ruff
 			local lspconfig = require("lspconfig")
 			local configs = require("lspconfig.configs")
 			local util = require("lspconfig.util")
@@ -44,13 +45,44 @@ return {
 				}
 			end
 
-			-- Setup ty with capabilities
+			-- Determine ruff path based on OS
+			local ruff_cmd = "ruff"  -- Default: rely on PATH
+			if vim.fn.has("win32") == 1 then
+				-- On Windows, check common locations or use PATH
+				local windows_path = vim.fn.expand("~\\AppData\\Roaming\\Python\\Scripts\\ruff.exe")
+				if vim.fn.executable(windows_path) == 1 then
+					ruff_cmd = windows_path
+				end
+			elseif vim.fn.has("unix") == 1 then
+				-- On Unix/Mac, check common locations
+				local unix_path = vim.fn.expand("~/.local/bin/ruff")
+				if vim.fn.executable(unix_path) == 1 then
+					ruff_cmd = unix_path
+				end
+			end
+
+			-- Setup ty with capabilities (type checking)
 			lspconfig.ty.setup({
 				capabilities = require("cmp_nvim_lsp").default_capabilities(),
 				flags = {
 					debounce_text_changes = 150,
 				},
 				on_attach = function(client, bufnr)
+					-- Performance: disable semantic tokens for faster highlighting
+					client.server_capabilities.semanticTokensProvider = nil
+				end,
+			})
+
+			-- Setup ruff for linting diagnostics
+			lspconfig.ruff.setup({
+				cmd = { ruff_cmd, "server" },
+				capabilities = require("cmp_nvim_lsp").default_capabilities(),
+				flags = {
+					debounce_text_changes = 150,
+				},
+				on_attach = function(client, bufnr)
+					-- Disable ruff's hover in favor of ty
+					client.server_capabilities.hoverProvider = false
 					-- Performance: disable semantic tokens for faster highlighting
 					client.server_capabilities.semanticTokensProvider = nil
 				end,
