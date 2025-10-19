@@ -7,35 +7,40 @@ return {
 		build = ":MasonUpdate",
 		opts = {
 			ensure_installed = {
-				-- Formatters
+				-- Formatters and Linters
 				"stylua",
-				"ruff",
-
-				-- Linters  
-				"ruff", -- also used for linting
+				"ruff", -- Python formatter and linter
 			},
 		},
 		config = function(_, opts)
 			require("mason").setup(opts)
 			local mr = require("mason-registry")
+
+			-- Trigger FileType event when package installs (no delay needed)
 			mr:on("package:install:success", function()
-				vim.defer_fn(function()
-					-- Trigger FileType event to possibly load this newly installed LSP server
-					require("lazy.core.handler.event").trigger({
-						event = "FileType",
-						buf = vim.api.nvim_get_current_buf(),
-					})
-				end, 100)
+				-- Trigger FileType event to possibly load this newly installed LSP server
+				require("lazy.core.handler.event").trigger({
+					event = "FileType",
+					buf = vim.api.nvim_get_current_buf(),
+				})
 			end)
 
 			-- Auto-install servers on startup if they're not installed
-			vim.defer_fn(function()
+			-- Use registry:on("ready") instead of defer_fn for better timing
+			local function ensure_installed()
 				for _, tool in ipairs(opts.ensure_installed) do
-					if not mr.is_installed(tool) then
-						vim.cmd("MasonInstall " .. tool)
+					local p = mr.get_package(tool)
+					if not p:is_installed() then
+						p:install()
 					end
 				end
-			end, 100)
+			end
+
+			if mr.refresh then
+				mr.refresh(ensure_installed)
+			else
+				ensure_installed()
+			end
 		end,
 	},
 	{
@@ -56,27 +61,9 @@ return {
 			local mason_lspconfig = require("mason-lspconfig")
 			mason_lspconfig.setup(opts)
 
-			-- Set up diagnostic configuration with signs and float
-			vim.diagnostic.config({
-				float = {
-					focusable = false,
-					style = "minimal",
-					border = "rounded",
-					source = "always", -- Always show source in float
-					header = "",
-					prefix = "",
-				},
-				signs = {
-					text = {
-						[vim.diagnostic.severity.ERROR] = "",
-						[vim.diagnostic.severity.WARN] = "⚠",
-						[vim.diagnostic.severity.HINT] = "󰌶",
-						[vim.diagnostic.severity.INFO] = "",
-					},
-				},
-			})
+			-- Note: Diagnostic configuration is handled in core/state.lua
 
-			-- Setup handlers for automatic server configuration
+			-- Setup handlers for automatic server configuration using new API
 			-- Check if setup_handlers is available (newer versions of mason-lspconfig)
 			if mason_lspconfig.setup_handlers then
 				mason_lspconfig.setup_handlers({
@@ -91,81 +78,84 @@ return {
 
 						-- Server-specific configurations
 						if server_name == "lua_ls" then
-						server_config = {
-							settings = {
-								Lua = {
-									runtime = { version = "LuaJIT" },
-									workspace = {
-										checkThirdParty = false,
-										maxPreload = 100000,
-										preloadFileSize = 10000,
-										library = {
-											vim.env.VIMRUNTIME,
-											-- Add lazy.nvim to the library
-											"${3rd}/luv/library",
-											"${3rd}/busted/library",
+							server_config = {
+								settings = {
+									Lua = {
+										runtime = { version = "LuaJIT" },
+										workspace = {
+											checkThirdParty = false,
+											maxPreload = 100000,
+											preloadFileSize = 10000,
+											library = {
+												vim.env.VIMRUNTIME,
+												-- Add lazy.nvim to the library
+												"${3rd}/luv/library",
+												"${3rd}/busted/library",
+											},
+											-- Exclude directories that shouldn't be scanned
+											ignoreDir = {
+												".git",
+												"node_modules",
+												".vscode",
+												".idea",
+												"dist",
+												"build",
+												".next",
+												".nuxt",
+												".output",
+												".venv",
+												"venv",
+												"env",
+												"__pycache__",
+												".pytest_cache",
+												".mypy_cache",
+												"AppData/Local/Temp",
+												"AppData/Roaming",
+												"AppData/LocalLow",
+												"scoop",
+												"tools",
+												"Downloads",
+												"Documents",
+												"Desktop",
+												"Pictures",
+												"Music",
+												"Videos",
+											},
 										},
-										-- Exclude directories that shouldn't be scanned
-										ignoreDir = {
-											".git",
-											"node_modules",
-											".vscode",
-											".idea",
-											"dist",
-											"build",
-											".next",
-											".nuxt",
-											".output",
-											".venv",
-											"venv",
-											"env",
-											"__pycache__",
-											".pytest_cache",
-											".mypy_cache",
-											"AppData/Local/Temp",
-											"AppData/Roaming",
-											"AppData/LocalLow",
-											"scoop",
-											"tools",
-											"Downloads",
-											"Documents",
-											"Desktop",
-											"Pictures",
-											"Music",
-											"Videos",
+										completion = {
+											callSnippet = "Replace",
 										},
-									},
-									completion = {
-										callSnippet = "Replace",
-									},
-									diagnostics = {
-										globals = { "vim" },
+										diagnostics = {
+											globals = { "vim" },
+										},
 									},
 								},
-							},
+							}
+						end
+
+						-- Apply common settings to all servers
+						local common_config = {
+							capabilities = require("cmp_nvim_lsp").default_capabilities(),
 						}
-					end
 
+						-- Merge server-specific config with common config
+						local final_config = vim.tbl_deep_extend("force", common_config, server_config)
 
-					-- Apply common settings to all servers
-					local common_config = {
-						capabilities = require("cmp_nvim_lsp").default_capabilities(),
-						-- Performance optimizations
-						flags = {
-							debounce_text_changes = 150,
-						},
-						on_attach = function(client, bufnr)
-							-- Performance: disable semantic tokens for faster highlighting
-							client.server_capabilities.semanticTokensProvider = nil
-						end,
-					}
+						-- Use new vim.lsp.config API for Neovim 0.11+
+						vim.lsp.config[server_name] = final_config
 
-					-- Merge server-specific config with common config
-					local final_config = vim.tbl_deep_extend("force", common_config, server_config)
-
-					require("lspconfig")[server_name].setup(final_config)
-				end,
-			})
+						-- Auto-enable the LSP when appropriate filetype is detected
+						local filetypes = final_config.filetypes or vim.lsp.config[server_name].filetypes
+						if filetypes then
+							vim.api.nvim_create_autocmd("FileType", {
+								pattern = filetypes,
+								callback = function()
+									vim.lsp.enable(server_name)
+								end,
+							})
+						end
+					end,
+				})
 			end
 		end,
 	},

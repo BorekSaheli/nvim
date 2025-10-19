@@ -48,40 +48,56 @@ return {
 			-- Helper function to find root directory
 			local function root_pattern(...)
 				local patterns = { ... }
-				return function(fname)
-					return vim.fs.find(patterns, { path = fname, upward = true })[1]
+				return function(fname_or_bufnr)
+					-- Convert buffer number to file path if needed
+					local fname = fname_or_bufnr
+					if type(fname_or_bufnr) == "number" then
+						fname = vim.api.nvim_buf_get_name(fname_or_bufnr)
+					end
+
+					-- Return the directory containing the pattern file
+					local found = vim.fs.find(patterns, { path = fname, upward = true })[1]
+					if found then
+						return vim.fs.dirname(found)
+					end
+					return nil
 				end
 			end
 
-			-- Configure ty LSP using the new vim.lsp.config API
-			vim.lsp.config.ty = {
-				cmd = { ty_cmd, "server" },
-				filetypes = { "python" },
-				root_dir = root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git"),
-				capabilities = require("cmp_nvim_lsp").default_capabilities(),
-			}
-
-			-- Configure ruff LSP using the new vim.lsp.config API
-			vim.lsp.config.ruff = {
-				cmd = { ruff_cmd, "server" },
-				filetypes = { "python" },
-				root_dir = root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git"),
-				capabilities = require("cmp_nvim_lsp").default_capabilities(),
-			}
-
-			-- Enable ty LSP for Python files with on_attach customization
+			-- Start ty and ruff LSP for Python files using vim.lsp.start
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "python",
-				callback = function(args)
-					vim.lsp.enable("ty")
-				end,
-			})
+				callback = function(ev)
+					local bufnr = ev.buf
+					local fname = vim.api.nvim_buf_get_name(bufnr)
 
-			-- Enable ruff LSP for Python files with on_attach customization
-			vim.api.nvim_create_autocmd("FileType", {
-				pattern = "python",
-				callback = function(args)
-					vim.lsp.enable("ruff")
+					-- Find root directory
+					local root = root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git")(fname)
+
+					-- Fallback to current directory if no root found
+					if not root or root == "" then
+						root = vim.fn.getcwd()
+					end
+
+					-- Start ty (type checking)
+					local ty_client = vim.lsp.start({
+						name = "ty",
+						cmd = { ty_cmd, "server" },
+						root_dir = root,
+						capabilities = require("cmp_nvim_lsp").default_capabilities(),
+					}, {
+						bufnr = bufnr,
+					})
+
+					-- Start ruff (linting)
+					local ruff_client = vim.lsp.start({
+						name = "ruff",
+						cmd = { ruff_cmd, "server" },
+						root_dir = root,
+						capabilities = require("cmp_nvim_lsp").default_capabilities(),
+					}, {
+						bufnr = bufnr,
+					})
 				end,
 			})
 
