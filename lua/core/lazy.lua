@@ -17,15 +17,9 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Setup lazy.nvim
 require("lazy").setup({
-	defaults = {
-		-- try installing the latest stable version for plugins that support semver
-		{ version = "*" },
-	},
 	spec = {
-		-- import your plugins
+		-- Import all plugins from lua/plugins/*.lua
 		{ import = "plugins" },
-		-- import core configurations
-		{ import = "core.mason" },
 	},
 	change_detection = { enabled = false },
 })
