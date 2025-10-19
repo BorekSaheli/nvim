@@ -14,24 +14,6 @@ return {
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			local state = require("core.state")
-			local state = require("core.state")
-
-			-- Track LSP status
-			local lsp_ready = false
-			
-			-- Function to check if any LSP clients are attached
-			local function check_lsp_status()
-				local clients = vim.lsp.get_active_clients({ bufnr = 0 })
-				local has_lsp = #clients > 0
-				
-				if has_lsp and not lsp_ready then
-					lsp_ready = true
-				elseif not has_lsp and lsp_ready then
-					lsp_ready = false
-				end
-				
-				return has_lsp
-			end
 
 			-- Setup completion
 			cmp.setup({
@@ -135,29 +117,6 @@ return {
 					end,
 				},
 			})
-
-			-- LSP event handlers for debugging
-			vim.api.nvim_create_autocmd("LspAttach", {
-				callback = function(args)
-					local client = vim.lsp.get_client_by_id(args.data.client_id)
-					if client then
-						lsp_ready = true
-					end
-				end,
-			})
-
-			vim.api.nvim_create_autocmd("LspDetach", {
-				callback = function(args)
-					local client = vim.lsp.get_client_by_id(args.data.client_id)
-					if client then
-						-- Check if any other LSP clients are still attached
-						vim.defer_fn(function()
-							check_lsp_status()
-						end, 100)
-					end
-				end,
-			})
-
 		end,
 	},
 }
