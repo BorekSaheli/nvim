@@ -52,6 +52,13 @@ return {
 				desc = "Toggle Semantic Highlighting",
 			},
 			{
+				"<leader>ta",
+				function()
+					_G.toggle_dashboard_ascii()
+				end,
+				desc = "Toggle ASCII Art Style",
+			},
+			{
 				"<leader>?",
 				function()
 					which_key.show({ global = false })
