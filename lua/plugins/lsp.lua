@@ -12,9 +12,6 @@ return {
 			-- Set up ty LSP (Astral's Python LSP) and ruff_lsp
 			-- Note: ty must be installed manually with: uv tool install ty
 			-- Note: ruff must be installed manually with: uv tool install ruff
-			local lspconfig = require("lspconfig")
-			local configs = require("lspconfig.configs")
-			local util = require("lspconfig.util")
 
 			-- Determine ty path based on OS
 			local ty_cmd = "ty"  -- Default: rely on PATH
@@ -30,19 +27,6 @@ return {
 				if vim.fn.executable(unix_path) == 1 then
 					ty_cmd = unix_path
 				end
-			end
-
-			-- Add ty to lspconfig if not already present
-			if not configs.ty then
-				configs.ty = {
-					default_config = {
-						cmd = { ty_cmd, "server" },
-						filetypes = { "python" },
-						root_dir = util.root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git"),
-						single_file_support = true,
-						settings = {},
-					},
-				}
 			end
 
 			-- Determine ruff path based on OS
@@ -61,30 +45,67 @@ return {
 				end
 			end
 
-			-- Setup ty with capabilities (type checking)
-			lspconfig.ty.setup({
+			-- Helper function to find root directory
+			local function root_pattern(...)
+				local patterns = { ... }
+				return function(fname)
+					return vim.fs.find(patterns, { path = fname, upward = true })[1]
+				end
+			end
+
+			-- Configure ty LSP using the new vim.lsp.config API
+			vim.lsp.config.ty = {
+				cmd = { ty_cmd, "server" },
+				filetypes = { "python" },
+				root_dir = root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git"),
 				capabilities = require("cmp_nvim_lsp").default_capabilities(),
-				flags = {
-					debounce_text_changes = 150,
-				},
-				on_attach = function(client, bufnr)
-					-- Performance: disable semantic tokens for faster highlighting
-					client.server_capabilities.semanticTokensProvider = nil
+			}
+
+			-- Configure ruff LSP using the new vim.lsp.config API
+			vim.lsp.config.ruff = {
+				cmd = { ruff_cmd, "server" },
+				filetypes = { "python" },
+				root_dir = root_pattern("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git"),
+				capabilities = require("cmp_nvim_lsp").default_capabilities(),
+			}
+
+			-- Enable ty LSP for Python files with on_attach customization
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "python",
+				callback = function(args)
+					vim.lsp.enable("ty")
 				end,
 			})
 
-			-- Setup ruff for linting diagnostics
-			lspconfig.ruff.setup({
-				cmd = { ruff_cmd, "server" },
-				capabilities = require("cmp_nvim_lsp").default_capabilities(),
-				flags = {
-					debounce_text_changes = 150,
-				},
-				on_attach = function(client, bufnr)
-					-- Disable ruff's hover in favor of ty
-					client.server_capabilities.hoverProvider = false
-					-- Performance: disable semantic tokens for faster highlighting
-					client.server_capabilities.semanticTokensProvider = nil
+			-- Enable ruff LSP for Python files with on_attach customization
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "python",
+				callback = function(args)
+					vim.lsp.enable("ruff")
+				end,
+			})
+
+			-- Custom on_attach behavior for ty (disable semantic tokens)
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					if client and client.name == "ty" then
+						-- Performance: disable semantic tokens for faster highlighting
+						client.server_capabilities.semanticTokensProvider = nil
+					end
+				end,
+			})
+
+			-- Custom on_attach behavior for ruff (disable hover and semantic tokens)
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					if client and client.name == "ruff" then
+						-- Disable ruff's hover in favor of ty
+						client.server_capabilities.hoverProvider = false
+						-- Performance: disable semantic tokens for faster highlighting
+						client.server_capabilities.semanticTokensProvider = nil
+					end
 				end,
 			})
 
