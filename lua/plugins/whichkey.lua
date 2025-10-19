@@ -26,23 +26,30 @@ return {
 			{
 				"<F9>",
 				function()
-					local is_enabled = state.toggle_diagnostics()
+					state.toggle_diagnostics()
 				end,
-				desc = "Toggle Diagnostics",
+				desc = "Toggle Diagnostics Virtual Text",
 			},
 			{
 				"<F10>",
 				function()
-					local is_enabled = state.toggle_completion()
+					state.toggle_completion()
 				end,
 				desc = "Toggle Completion Popup",
 			},
 			{
 				"<leader>td",
 				function()
-					local is_enabled = state.toggle_diagnostics()
+					state.toggle_diagnostics()
 				end,
-				desc = "Toggle Diagnostics",
+				desc = "Toggle Diagnostics Virtual Text",
+			},
+			{
+				"<leader>th",
+				function()
+					state.toggle_semantic_tokens()
+				end,
+				desc = "Toggle Semantic Highlighting",
 			},
 			{
 				"<leader>?",

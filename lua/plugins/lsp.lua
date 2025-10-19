@@ -101,26 +101,13 @@ return {
 				end,
 			})
 
-			-- Custom on_attach behavior for ty (disable semantic tokens)
-			vim.api.nvim_create_autocmd("LspAttach", {
-				callback = function(args)
-					local client = vim.lsp.get_client_by_id(args.data.client_id)
-					if client and client.name == "ty" then
-						-- Performance: disable semantic tokens for faster highlighting
-						client.server_capabilities.semanticTokensProvider = nil
-					end
-				end,
-			})
-
-			-- Custom on_attach behavior for ruff (disable hover and semantic tokens)
+			-- Custom on_attach behavior for ruff
 			vim.api.nvim_create_autocmd("LspAttach", {
 				callback = function(args)
 					local client = vim.lsp.get_client_by_id(args.data.client_id)
 					if client and client.name == "ruff" then
-						-- Disable ruff's hover in favor of ty
+						-- Disable ruff's hover in favor of ty (ty provides better type info)
 						client.server_capabilities.hoverProvider = false
-						-- Performance: disable semantic tokens for faster highlighting
-						client.server_capabilities.semanticTokensProvider = nil
 					end
 				end,
 			})

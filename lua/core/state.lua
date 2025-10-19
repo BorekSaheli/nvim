@@ -73,6 +73,63 @@ function M.toggle_diagnostics()
 end
 
 -- ============================================================================
+-- SEMANTIC TOKENS TOGGLE
+-- ============================================================================
+local semantic_tokens_file = vim.fn.stdpath("data") .. "/semantic_tokens_enabled"
+
+local function load_semantic_tokens_state()
+	local file = io.open(semantic_tokens_file, "r")
+	if file then
+		local content = file:read("*a")
+		file:close()
+		return content:match("1") ~= nil
+	end
+	return true -- Default: semantic tokens enabled
+end
+
+local function save_semantic_tokens_state(enabled)
+	local file = io.open(semantic_tokens_file, "w")
+	if file then
+		file:write(enabled and "1" or "0")
+		file:close()
+	end
+end
+
+_G.SEMANTIC_TOKENS_ENABLED = load_semantic_tokens_state()
+
+function M.toggle_semantic_tokens()
+	_G.SEMANTIC_TOKENS_ENABLED = not _G.SEMANTIC_TOKENS_ENABLED
+	save_semantic_tokens_state(_G.SEMANTIC_TOKENS_ENABLED)
+
+	local current_buf = vim.api.nvim_get_current_buf()
+
+	-- Toggle semantic tokens for all active LSP clients
+	for _, client in ipairs(vim.lsp.get_clients({ bufnr = current_buf })) do
+		if client.supports_method("textDocument/semanticTokens/full") then
+			if _G.SEMANTIC_TOKENS_ENABLED then
+				-- Enable: force a refresh
+				pcall(vim.lsp.semantic_tokens.start, current_buf, client.id)
+			else
+				-- Disable: stop semantic tokens for this buffer
+				pcall(vim.lsp.semantic_tokens.stop, current_buf, client.id)
+			end
+		end
+	end
+
+	-- Clear and redraw to show changes immediately
+	vim.cmd("nohlsearch")
+	vim.cmd("redraw!")
+
+	local status = _G.SEMANTIC_TOKENS_ENABLED and "ON" or "OFF"
+	vim.notify("Semantic tokens: " .. status .. " (ty only)", vim.log.levels.INFO)
+
+	-- Force lualine to refresh immediately
+	pcall(require("lualine").refresh)
+
+	return _G.SEMANTIC_TOKENS_ENABLED
+end
+
+-- ============================================================================
 -- COMPLETION TOGGLE
 -- ============================================================================
 local completion_file = vim.fn.stdpath("data") .. "/completion_enabled"
