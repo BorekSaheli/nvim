@@ -14,6 +14,7 @@ return {
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			local state = require("core.state")
+			local state = require("core.state")
 
 			-- Track LSP status
 			local lsp_ready = false
@@ -35,7 +36,7 @@ return {
 			-- Setup completion
 			cmp.setup({
 				enabled = function()
-					return _G.COMPLETION_ENABLED
+					return state.is_completion_enabled()
 				end,
 				snippet = {
 					expand = function(args)

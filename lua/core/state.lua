@@ -23,7 +23,13 @@ local function save_diagnostics_state(enabled)
 	end
 end
 
-_G.DIAGNOSTICS_ENABLED = load_diagnostics_state()
+-- Module-local state (not global)
+local diagnostics_enabled = load_diagnostics_state()
+
+-- Getter for external access (e.g., lualine)
+function M.is_diagnostics_enabled()
+	return diagnostics_enabled
+end
 
 -- Base diagnostic configuration
 vim.diagnostic.config({
@@ -46,30 +52,30 @@ vim.diagnostic.config({
 	underline = true,
 	update_in_insert = false,
 	severity_sort = true,
-	virtual_text = _G.DIAGNOSTICS_ENABLED and {
+	virtual_text = diagnostics_enabled and {
 		source = "always",
 		prefix = "●",
 	} or false,
 })
 
 function M.toggle_diagnostics()
-	_G.DIAGNOSTICS_ENABLED = not _G.DIAGNOSTICS_ENABLED
-	save_diagnostics_state(_G.DIAGNOSTICS_ENABLED)
+	diagnostics_enabled = not diagnostics_enabled
+	save_diagnostics_state(diagnostics_enabled)
 
 	vim.diagnostic.config({
-		virtual_text = _G.DIAGNOSTICS_ENABLED and {
+		virtual_text = diagnostics_enabled and {
 			source = "always",
 			prefix = "●",
 		} or false,
 	})
 
-	local status = _G.DIAGNOSTICS_ENABLED and "ON" or "OFF"
+	local status = diagnostics_enabled and "ON" or "OFF"
 	vim.notify("Diagnostic virtual text: " .. status, vim.log.levels.INFO)
 
 	-- Force lualine to refresh immediately
 	pcall(require("lualine").refresh)
 
-	return _G.DIAGNOSTICS_ENABLED
+	return diagnostics_enabled
 end
 
 -- ============================================================================
@@ -95,18 +101,24 @@ local function save_semantic_tokens_state(enabled)
 	end
 end
 
-_G.SEMANTIC_TOKENS_ENABLED = load_semantic_tokens_state()
+-- Module-local state (not global)
+local semantic_tokens_enabled = load_semantic_tokens_state()
+
+-- Getter for external access
+function M.is_semantic_tokens_enabled()
+	return semantic_tokens_enabled
+end
 
 function M.toggle_semantic_tokens()
-	_G.SEMANTIC_TOKENS_ENABLED = not _G.SEMANTIC_TOKENS_ENABLED
-	save_semantic_tokens_state(_G.SEMANTIC_TOKENS_ENABLED)
+	semantic_tokens_enabled = not semantic_tokens_enabled
+	save_semantic_tokens_state(semantic_tokens_enabled)
 
 	local current_buf = vim.api.nvim_get_current_buf()
 
 	-- Toggle semantic tokens for all active LSP clients
 	for _, client in ipairs(vim.lsp.get_clients({ bufnr = current_buf })) do
 		if client.supports_method("textDocument/semanticTokens/full") then
-			if _G.SEMANTIC_TOKENS_ENABLED then
+			if semantic_tokens_enabled then
 				-- Enable: force a refresh
 				pcall(vim.lsp.semantic_tokens.start, current_buf, client.id)
 			else
@@ -120,13 +132,13 @@ function M.toggle_semantic_tokens()
 	vim.cmd("nohlsearch")
 	vim.cmd("redraw!")
 
-	local status = _G.SEMANTIC_TOKENS_ENABLED and "ON" or "OFF"
+	local status = semantic_tokens_enabled and "ON" or "OFF"
 	vim.notify("Semantic tokens: " .. status .. " (ty only)", vim.log.levels.INFO)
 
 	-- Force lualine to refresh immediately
 	pcall(require("lualine").refresh)
 
-	return _G.SEMANTIC_TOKENS_ENABLED
+	return semantic_tokens_enabled
 end
 
 -- ============================================================================
@@ -152,27 +164,33 @@ local function save_completion_state(enabled)
 	end
 end
 
-_G.COMPLETION_ENABLED = load_completion_state()
+-- Module-local state (not global)
+local completion_enabled = load_completion_state()
+
+-- Getter for external access
+function M.is_completion_enabled()
+	return completion_enabled
+end
 
 function M.toggle_completion()
-	_G.COMPLETION_ENABLED = not _G.COMPLETION_ENABLED
-	save_completion_state(_G.COMPLETION_ENABLED)
+	completion_enabled = not completion_enabled
+	save_completion_state(completion_enabled)
 
 	-- Close any open completion menu if disabling
-	if not _G.COMPLETION_ENABLED then
+	if not completion_enabled then
 		local ok, cmp = pcall(require, "cmp")
 		if ok and cmp.visible() then
 			cmp.close()
 		end
 	end
 
-	local status = _G.COMPLETION_ENABLED and "ON" or "OFF"
+	local status = completion_enabled and "ON" or "OFF"
 	vim.notify("Completion: " .. status, vim.log.levels.INFO)
 
 	-- Force lualine to refresh immediately
 	pcall(require("lualine").refresh)
 
-	return _G.COMPLETION_ENABLED
+	return completion_enabled
 end
 
 -- ============================================================================
@@ -198,7 +216,13 @@ local function save_copilot_state(enabled)
 	end
 end
 
-_G.COPILOT_ENABLED = load_copilot_state()
+-- Module-local state (not global)
+local copilot_enabled = load_copilot_state()
+
+-- Getter for external access
+function M.is_copilot_enabled()
+	return copilot_enabled
+end
 
 local function apply_copilot_state(enabled)
 	pcall(function()
@@ -207,17 +231,17 @@ local function apply_copilot_state(enabled)
 end
 
 function M.toggle_copilot()
-	_G.COPILOT_ENABLED = not _G.COPILOT_ENABLED
-	save_copilot_state(_G.COPILOT_ENABLED)
-	apply_copilot_state(_G.COPILOT_ENABLED)
+	copilot_enabled = not copilot_enabled
+	save_copilot_state(copilot_enabled)
+	apply_copilot_state(copilot_enabled)
 
-	local status = _G.COPILOT_ENABLED and "ON" or "OFF"
+	local status = copilot_enabled and "ON" or "OFF"
 	vim.notify("Copilot: " .. status, vim.log.levels.INFO)
 
 	-- Force lualine to refresh immediately
 	pcall(require("lualine").refresh)
 
-	return _G.COPILOT_ENABLED
+	return copilot_enabled
 end
 
 -- Initialize copilot when it loads
@@ -225,7 +249,7 @@ vim.api.nvim_create_autocmd("User", {
 	pattern = "CopilotReady",
 	once = true,
 	callback = function()
-		apply_copilot_state(_G.COPILOT_ENABLED)
+		apply_copilot_state(copilot_enabled)
 	end,
 })
 

@@ -148,15 +148,16 @@ return {
       end,
     })
 
-    -- Zero-cost providers (read globals only)
+    -- Zero-cost providers (use state module getters)
+    local state = require("core.state")
     local function copilot_status()
-      return _G.COPILOT_ENABLED and "" or ""
+      return state.is_copilot_enabled() and "" or ""
     end
     local function diagnostic_toggle()
-      return _G.DIAGNOSTICS_ENABLED and "󱖫 on" or "󱖫 off"
+      return state.is_diagnostics_enabled() and "󱖫 on" or "󱖫 off"
     end
     local function completion_toggle()
-      return _G.COMPLETION_ENABLED and "󰍉 on" or "󰍉 off"
+      return state.is_completion_enabled() and "󰍉 on" or "󰍉 off"
     end
 
     -- Filetype/venv component: no IO; uses cache
