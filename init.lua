@@ -1,5 +1,6 @@
 require("core.options")
 require("core.state")  -- Load state management early for diagnostics/toggles
+require("core.wezterm")  -- WezTerm terminal integration
 require("core.lazy")
 
 -- Windows file watching fix
