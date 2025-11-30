@@ -19,6 +19,10 @@ vim.opt.signcolumn = "yes"
 vim.opt.backup = false -- Prevents creating a backup file
 vim.keymap.set("n", "<C-z>", "<Nop>", { desc = "Disable Ctrl+Z" }) -- Disable Ctrl+Z
 
+-- Swap file handling to prevent warnings when multiple instances are open
+vim.opt.swapfile = true -- Keep swap files for crash recovery
+vim.opt.shortmess:append("A") -- Ignore swapfile warnings when opening files
+
 -- save file on leader leader
 vim.keymap.set("n", "<leader><leader>", ":w<CR>", { desc = "Save file" })
 
@@ -41,3 +45,9 @@ vim.opt.completeopt = { "menu", "menuone", "noselect" }  -- Better completion ex
 -- Center screen after half-page movements
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Half page down and center" })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Half page up and center" })
+
+-- Global Copilot toggle keybinding (works whether plugin is loaded or not)
+vim.keymap.set("n", "<F8>", function()
+	local state = require("core.state")
+	state.toggle_copilot()
+end, { noremap = true, silent = true, desc = "Toggle Copilot" })

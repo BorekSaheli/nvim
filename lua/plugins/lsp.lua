@@ -88,9 +88,15 @@ return {
 					local fname = vim.api.nvim_buf_get_name(bufnr)
 					local root = root_pattern(".luarc.json", ".stylua.toml", "stylua.toml", ".git")(fname) or vim.fn.getcwd()
 
+					-- Find lua-language-server from Mason or PATH
+					local lua_ls_cmd = vim.fn.expand("~/.local/share/nvim/mason/bin/lua-language-server")
+					if vim.fn.executable(lua_ls_cmd) ~= 1 then
+						lua_ls_cmd = "lua-language-server"  -- Fallback to PATH
+					end
+
 					vim.lsp.start({
 						name = "lua_ls",
-						cmd = { "lua-language-server" },
+						cmd = { lua_ls_cmd },
 						root_dir = root,
 						capabilities = require("cmp_nvim_lsp").default_capabilities(),
 						settings = {

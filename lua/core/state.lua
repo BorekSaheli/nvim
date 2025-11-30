@@ -233,24 +233,59 @@ end
 function M.toggle_copilot()
 	copilot_enabled = not copilot_enabled
 	save_copilot_state(copilot_enabled)
-	apply_copilot_state(copilot_enabled)
 
-	local status = copilot_enabled and "ON" or "OFF"
-	vim.notify("Copilot: " .. status, vim.log.levels.INFO)
+	if copilot_enabled then
+		-- Toggling ON: try to load the plugin
+		local lazy_ok, lazy = pcall(require, "lazy")
+		if lazy_ok then
+			-- Check if copilot commands exist (indicates it's loaded)
+			local copilot_loaded = vim.fn.exists(":Copilot") == 2
 
-	-- Force lualine to refresh immediately
-	pcall(require("lualine").refresh)
+			if not copilot_loaded then
+				-- Plugin not loaded: load it dynamically
+				vim.notify("Loading Copilot...", vim.log.levels.INFO)
+
+				-- Try to load the plugin
+				local load_ok = pcall(lazy.load, { plugins = { "copilot.vim" } })
+
+				if load_ok then
+					-- Wait for copilot to initialize, then enable
+					vim.defer_fn(function()
+						-- Check if it loaded successfully
+						if vim.fn.exists(":Copilot") == 2 then
+							apply_copilot_state(true)
+							vim.notify("Copilot: ON", vim.log.levels.INFO)
+							pcall(require("lualine").refresh)
+						else
+							vim.notify("Copilot failed to load - restart required", vim.log.levels.ERROR)
+							pcall(require("lualine").refresh)
+						end
+					end, 1000)
+					return copilot_enabled
+				else
+					vim.notify("Copilot: ON (restart required)", vim.log.levels.WARN)
+					pcall(require("lualine").refresh)
+				end
+			else
+				-- Already loaded: just enable
+				vim.defer_fn(function()
+					apply_copilot_state(true)
+					vim.notify("Copilot: ON", vim.log.levels.INFO)
+					pcall(require("lualine").refresh)
+				end, 100)
+			end
+		else
+			vim.notify("Copilot: ON (restart required)", vim.log.levels.WARN)
+			pcall(require("lualine").refresh)
+		end
+	else
+		-- Toggling OFF: just disable (keep plugin loaded)
+		apply_copilot_state(false)
+		vim.notify("Copilot: OFF", vim.log.levels.INFO)
+		pcall(require("lualine").refresh)
+	end
 
 	return copilot_enabled
 end
-
--- Initialize copilot when it loads
-vim.api.nvim_create_autocmd("User", {
-	pattern = "CopilotReady",
-	once = true,
-	callback = function()
-		apply_copilot_state(copilot_enabled)
-	end,
-})
 
 return M
