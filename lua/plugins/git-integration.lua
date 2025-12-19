@@ -1,12 +1,8 @@
 return {
 	{
-		"tpope/vim-fugitive",
-		enabled = true, -- Add enabled property
-	},
-	{
 		"lewis6991/gitsigns.nvim",
 		version = "v1.0.0",
-		enabled = true, -- Add enabled property
+		event = { "BufReadPost", "BufNewFile" },
 		opts = {
 			signs = {
 				add = { text = "┃" },
@@ -31,13 +27,11 @@ return {
 	},
 	{
 		"kdheepak/lazygit.nvim",
+		keys = {
+			{ "<leader>gg", "<cmd>LazyGit<CR>", desc = "Toggle Lazygit" },
+		},
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
-		enabled = true,
-		config = function()
-			-- Simple keymap for toggling lazygit with the default setup
-			vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<CR>", { desc = "Toggle Lazygit" })
-		end,
 	},
 }

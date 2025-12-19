@@ -16,10 +16,5 @@ return {
 		vim.api.nvim_set_hl(0, "Normal", { bg = "#030712" })
 		vim.api.nvim_set_hl(0, "NormalFloat", { bg = "#0d1220" })
 		vim.api.nvim_set_hl(0, "FloatBorder", { bg = "#0d1220" })
-
-		-- Simple overrides for background and line numbers
-		-- vim.api.nvim_set_hl(0, "LineNr", { fg = "#7f849c", bg = "NONE" })
-		-- vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#f9e2af", bg = "NONE", bold = true })
-		-- vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
 	end,
 }

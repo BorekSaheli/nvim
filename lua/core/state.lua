@@ -1,35 +1,74 @@
 local M = {}
 
 -- ============================================================================
--- DIAGNOSTICS TOGGLE (virtual text only - signs always visible)
+-- GENERIC TOGGLE STATE FACTORY
 -- ============================================================================
-local diagnostics_file = vim.fn.stdpath("data") .. "/diagnostics_enabled"
 
-local function load_diagnostics_state()
-	local file = io.open(diagnostics_file, "r")
-	if file then
-		local content = file:read("*a")
-		file:close()
-		return content:match("1") ~= nil
+local function create_toggle_state(name, default_value, apply_fn)
+	local state_file = vim.fn.stdpath("data") .. "/" .. name
+	local enabled = default_value
+
+	-- Load state from file
+	local function load_state()
+		local file = io.open(state_file, "r")
+		if file then
+			local content = file:read("*a")
+			file:close()
+			return content:match("1") ~= nil
+		end
+		return default_value
 	end
-	return true -- Default: virtual text enabled
-end
 
-local function save_diagnostics_state(enabled)
-	local file = io.open(diagnostics_file, "w")
-	if file then
-		file:write(enabled and "1" or "0")
-		file:close()
+	-- Save state to file
+	local function save_state(value)
+		local file = io.open(state_file, "w")
+		if file then
+			file:write(value and "1" or "0")
+			file:close()
+		end
 	end
+
+	-- Initialize
+	enabled = load_state()
+
+	-- Return state manager
+	return {
+		is_enabled = function()
+			return enabled
+		end,
+		toggle = function()
+			enabled = not enabled
+			save_state(enabled)
+			if apply_fn then
+				apply_fn(enabled)
+			end
+			return enabled
+		end,
+		get_value = function()
+			return enabled
+		end,
+	}
 end
 
--- Module-local state (not global)
-local diagnostics_enabled = load_diagnostics_state()
-
--- Getter for external access (e.g., lualine)
-function M.is_diagnostics_enabled()
-	return diagnostics_enabled
+-- Helper to refresh lualine
+local function refresh_lualine()
+	pcall(require("lualine").refresh)
 end
+
+-- ============================================================================
+-- DIAGNOSTICS TOGGLE
+-- ============================================================================
+
+local diagnostics_state = create_toggle_state("diagnostics_enabled", true, function(enabled)
+	vim.diagnostic.config({
+		virtual_text = enabled and {
+			source = "always",
+			prefix = "●",
+		} or false,
+	})
+	vim.notify("Diagnostic virtual text: " .. (enabled and "ON" or "OFF"), vim.log.levels.INFO)
+	refresh_lualine()
+end)
 
 -- Base diagnostic configuration
 vim.diagnostic.config({
@@ -52,177 +91,60 @@ vim.diagnostic.config({
 	underline = true,
 	update_in_insert = false,
 	severity_sort = true,
-	virtual_text = diagnostics_enabled and {
+	virtual_text = diagnostics_state.is_enabled() and {
 		source = "always",
 		prefix = "●",
 	} or false,
 })
 
-function M.toggle_diagnostics()
-	diagnostics_enabled = not diagnostics_enabled
-	save_diagnostics_state(diagnostics_enabled)
-
-	vim.diagnostic.config({
-		virtual_text = diagnostics_enabled and {
-			source = "always",
-			prefix = "●",
-		} or false,
-	})
-
-	local status = diagnostics_enabled and "ON" or "OFF"
-	vim.notify("Diagnostic virtual text: " .. status, vim.log.levels.INFO)
-
-	-- Force lualine to refresh immediately
-	pcall(require("lualine").refresh)
-
-	return diagnostics_enabled
-end
+M.is_diagnostics_enabled = diagnostics_state.is_enabled
+M.toggle_diagnostics = diagnostics_state.toggle
 
 -- ============================================================================
 -- SEMANTIC TOKENS TOGGLE
 -- ============================================================================
-local semantic_tokens_file = vim.fn.stdpath("data") .. "/semantic_tokens_enabled"
 
-local function load_semantic_tokens_state()
-	local file = io.open(semantic_tokens_file, "r")
-	if file then
-		local content = file:read("*a")
-		file:close()
-		return content:match("1") ~= nil
-	end
-	return true -- Default: semantic tokens enabled
-end
-
-local function save_semantic_tokens_state(enabled)
-	local file = io.open(semantic_tokens_file, "w")
-	if file then
-		file:write(enabled and "1" or "0")
-		file:close()
-	end
-end
-
--- Module-local state (not global)
-local semantic_tokens_enabled = load_semantic_tokens_state()
-
--- Getter for external access
-function M.is_semantic_tokens_enabled()
-	return semantic_tokens_enabled
-end
-
-function M.toggle_semantic_tokens()
-	semantic_tokens_enabled = not semantic_tokens_enabled
-	save_semantic_tokens_state(semantic_tokens_enabled)
-
+local semantic_tokens_state = create_toggle_state("semantic_tokens_enabled", true, function(enabled)
 	local current_buf = vim.api.nvim_get_current_buf()
-
-	-- Toggle semantic tokens for all active LSP clients
 	for _, client in ipairs(vim.lsp.get_clients({ bufnr = current_buf })) do
 		if client.supports_method("textDocument/semanticTokens/full") then
-			if semantic_tokens_enabled then
-				-- Enable: force a refresh
+			if enabled then
 				pcall(vim.lsp.semantic_tokens.start, current_buf, client.id)
 			else
-				-- Disable: stop semantic tokens for this buffer
 				pcall(vim.lsp.semantic_tokens.stop, current_buf, client.id)
 			end
 		end
 	end
-
-	-- Clear and redraw to show changes immediately
 	vim.cmd("nohlsearch")
 	vim.cmd("redraw!")
+	vim.notify("Semantic tokens: " .. (enabled and "ON" or "OFF") .. " (ty only)", vim.log.levels.INFO)
+	refresh_lualine()
+end)
 
-	local status = semantic_tokens_enabled and "ON" or "OFF"
-	vim.notify("Semantic tokens: " .. status .. " (ty only)", vim.log.levels.INFO)
-
-	-- Force lualine to refresh immediately
-	pcall(require("lualine").refresh)
-
-	return semantic_tokens_enabled
-end
+M.is_semantic_tokens_enabled = semantic_tokens_state.is_enabled
+M.toggle_semantic_tokens = semantic_tokens_state.toggle
 
 -- ============================================================================
 -- COMPLETION TOGGLE
 -- ============================================================================
-local completion_file = vim.fn.stdpath("data") .. "/completion_enabled"
 
-local function load_completion_state()
-	local file = io.open(completion_file, "r")
-	if file then
-		local content = file:read("*a")
-		file:close()
-		return content:match("1") ~= nil
-	end
-	return true -- Default: completion enabled
-end
-
-local function save_completion_state(enabled)
-	local file = io.open(completion_file, "w")
-	if file then
-		file:write(enabled and "1" or "0")
-		file:close()
-	end
-end
-
--- Module-local state (not global)
-local completion_enabled = load_completion_state()
-
--- Getter for external access
-function M.is_completion_enabled()
-	return completion_enabled
-end
-
-function M.toggle_completion()
-	completion_enabled = not completion_enabled
-	save_completion_state(completion_enabled)
-
-	-- Close any open completion menu if disabling
-	if not completion_enabled then
+local completion_state = create_toggle_state("completion_enabled", true, function(enabled)
+	if not enabled then
 		local ok, cmp = pcall(require, "cmp")
 		if ok and cmp.visible() then
 			cmp.close()
 		end
 	end
+	vim.notify("Completion: " .. (enabled and "ON" or "OFF"), vim.log.levels.INFO)
+	refresh_lualine()
+end)
 
-	local status = completion_enabled and "ON" or "OFF"
-	vim.notify("Completion: " .. status, vim.log.levels.INFO)
-
-	-- Force lualine to refresh immediately
-	pcall(require("lualine").refresh)
-
-	return completion_enabled
-end
+M.is_completion_enabled = completion_state.is_enabled
+M.toggle_completion = completion_state.toggle
 
 -- ============================================================================
 -- COPILOT TOGGLE
 -- ============================================================================
-local copilot_file = vim.fn.stdpath("data") .. "/copilot_enabled"
-
-local function load_copilot_state()
-	local file = io.open(copilot_file, "r")
-	if file then
-		local content = file:read("*a")
-		file:close()
-		return content:match("1") ~= nil
-	end
-	return true -- Default: copilot enabled
-end
-
-local function save_copilot_state(enabled)
-	local file = io.open(copilot_file, "w")
-	if file then
-		file:write(enabled and "1" or "0")
-		file:close()
-	end
-end
-
--- Module-local state (not global)
-local copilot_enabled = load_copilot_state()
-
--- Getter for external access
-function M.is_copilot_enabled()
-	return copilot_enabled
-end
 
 local function apply_copilot_state(enabled)
 	pcall(function()
@@ -230,62 +152,47 @@ local function apply_copilot_state(enabled)
 	end)
 end
 
-function M.toggle_copilot()
-	copilot_enabled = not copilot_enabled
-	save_copilot_state(copilot_enabled)
-
-	if copilot_enabled then
-		-- Toggling ON: try to load the plugin
+local copilot_state = create_toggle_state("copilot_enabled", true, function(enabled)
+	if enabled then
 		local lazy_ok, lazy = pcall(require, "lazy")
 		if lazy_ok then
-			-- Check if copilot commands exist (indicates it's loaded)
 			local copilot_loaded = vim.fn.exists(":Copilot") == 2
-
 			if not copilot_loaded then
-				-- Plugin not loaded: load it dynamically
 				vim.notify("Loading Copilot...", vim.log.levels.INFO)
-
-				-- Try to load the plugin
 				local load_ok = pcall(lazy.load, { plugins = { "copilot.vim" } })
-
 				if load_ok then
-					-- Wait for copilot to initialize, then enable
 					vim.defer_fn(function()
-						-- Check if it loaded successfully
 						if vim.fn.exists(":Copilot") == 2 then
 							apply_copilot_state(true)
 							vim.notify("Copilot: ON", vim.log.levels.INFO)
-							pcall(require("lualine").refresh)
 						else
 							vim.notify("Copilot failed to load - restart required", vim.log.levels.ERROR)
-							pcall(require("lualine").refresh)
 						end
+						refresh_lualine()
 					end, 1000)
-					return copilot_enabled
+					return -- Don't notify or refresh yet
 				else
 					vim.notify("Copilot: ON (restart required)", vim.log.levels.WARN)
-					pcall(require("lualine").refresh)
 				end
 			else
-				-- Already loaded: just enable
 				vim.defer_fn(function()
 					apply_copilot_state(true)
 					vim.notify("Copilot: ON", vim.log.levels.INFO)
-					pcall(require("lualine").refresh)
+					refresh_lualine()
 				end, 100)
+				return -- Don't notify or refresh yet
 			end
 		else
 			vim.notify("Copilot: ON (restart required)", vim.log.levels.WARN)
-			pcall(require("lualine").refresh)
 		end
 	else
-		-- Toggling OFF: just disable (keep plugin loaded)
 		apply_copilot_state(false)
 		vim.notify("Copilot: OFF", vim.log.levels.INFO)
-		pcall(require("lualine").refresh)
 	end
+	refresh_lualine()
+end)
 
-	return copilot_enabled
-end
+M.is_copilot_enabled = copilot_state.is_enabled
+M.toggle_copilot = copilot_state.toggle
 
 return M
