@@ -1,14 +1,9 @@
-require("core.options")
-require("core.state")  -- Load state management early for diagnostics/toggles
-require("core.lazy")
+-- Platform detection
+local IS_WINDOWS = vim.fn.has("win32") == 1
 
--- Windows file watching fix
-if vim.fn.has("win32") == 1 then
-	-- Disable problematic file watching on Windows
-	vim.opt.backup = false
-	vim.opt.writebackup = false
-	vim.opt.swapfile = false
-end
+require("core.state")    -- Load first (used by options.lua)
+require("core.options")  -- Then options (uses state)
+require("core.lazy")     -- Finally plugins
 
 -- Neovide configuration
 if vim.g.neovide then
@@ -19,8 +14,8 @@ if vim.g.neovide then
 	vim.g.neovide_window_floating_opacity = 0.8
 
 	-- Allow clipboard copy paste in neovim
-	vim.api.nvim_set_keymap('', '<D-v>', '+p<CR>', { noremap = true, silent = true})
-	vim.api.nvim_set_keymap('!', '<D-v>', '<C-R>+', { noremap = true, silent = true})
-	vim.api.nvim_set_keymap('t', '<D-v>', '<C-R>+', { noremap = true, silent = true})
-	vim.api.nvim_set_keymap('v', '<D-v>', '<C-R>+', { noremap = true, silent = true})
+	vim.keymap.set('', '<D-v>', '+p<CR>', { noremap = true, silent = true})
+	vim.keymap.set('!', '<D-v>', '<C-R>+', { noremap = true, silent = true})
+	vim.keymap.set('t', '<D-v>', '<C-R>+', { noremap = true, silent = true})
+	vim.keymap.set('v', '<D-v>', '<C-R>+', { noremap = true, silent = true})
 end

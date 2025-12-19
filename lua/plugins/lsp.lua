@@ -1,17 +1,22 @@
 return {
 	{
 		"neovim/nvim-lspconfig",
-		enabled = true,
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
 		},
-		event = { "BufReadPre", "BufNewFile" },
+		event = { "FileType" },
 		config = function()
 			-- Note: ty and ruff must be installed manually with: uv tool install ty ruff
 
+			-- Cache capabilities once
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			-- Platform detection
+			local IS_WINDOWS = vim.fn.has("win32") == 1
+
 			-- Determine ty path based on OS
 			local ty_cmd = "ty"  -- Default: rely on PATH
-			if vim.fn.has("win32") == 1 then
+			if IS_WINDOWS then
 				local windows_path = vim.fn.expand("~\\AppData\\Roaming\\Python\\Scripts\\ty.exe")
 				if vim.fn.executable(windows_path) == 1 then
 					ty_cmd = windows_path
@@ -25,7 +30,7 @@ return {
 
 			-- Determine ruff path based on OS
 			local ruff_cmd = "ruff"  -- Default: rely on PATH
-			if vim.fn.has("win32") == 1 then
+			if IS_WINDOWS then
 				local windows_path = vim.fn.expand("~\\AppData\\Roaming\\Python\\Scripts\\ruff.exe")
 				if vim.fn.executable(windows_path) == 1 then
 					ruff_cmd = windows_path
@@ -67,7 +72,7 @@ return {
 						name = "ty",
 						cmd = { ty_cmd, "server" },
 						root_dir = root,
-						capabilities = require("cmp_nvim_lsp").default_capabilities(),
+						capabilities = capabilities,
 					}, { bufnr = bufnr })
 
 					-- Start ruff (linting)
@@ -75,7 +80,7 @@ return {
 						name = "ruff",
 						cmd = { ruff_cmd, "server" },
 						root_dir = root,
-						capabilities = require("cmp_nvim_lsp").default_capabilities(),
+						capabilities = capabilities,
 					}, { bufnr = bufnr })
 				end,
 			})
@@ -98,7 +103,7 @@ return {
 						name = "lua_ls",
 						cmd = { lua_ls_cmd },
 						root_dir = root,
-						capabilities = require("cmp_nvim_lsp").default_capabilities(),
+						capabilities = capabilities,
 						settings = {
 							Lua = {
 								runtime = { version = "LuaJIT" },

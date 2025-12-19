@@ -1,7 +1,7 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		enabled = true,
+		event = "VeryLazy",
 		build = ":TSUpdate",
 		main = "nvim-treesitter.configs",
 		opts = {
@@ -24,7 +24,7 @@ return {
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
-		enabled = true,
+		event = "VeryLazy",
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 		main = "nvim-treesitter.configs",
 		opts = {

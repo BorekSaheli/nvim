@@ -1,8 +1,9 @@
-local cmd = require("utils").cmd
+local function cmd(command)
+	return table.concat({ "<Cmd>", command, "<CR>" })
+end
 
 return {
 	"folke/trouble.nvim",
-	enabled = true,
 	opts = {},
 	cmd = "Trouble",
 	keys = {
