@@ -7,6 +7,10 @@ return {
 		require("catppuccin").setup({
 			flavour = "mocha",
 			transparent_background = true,
+			integrations = {
+				noice = true,
+				notify = true,
+			},
 		})
 
 		vim.opt.guifont = "JetBrainsMonoNL Nerd Font:h12"
