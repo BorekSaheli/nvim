@@ -15,6 +15,13 @@ vim.keymap.set("n", "<F5>", ":w<CR>:aboveleft split term://python %<CR>:startins
 -- column options
 vim.opt.signcolumn = "yes"
 
+-- Indentation settings
+vim.opt.tabstop = 2        -- Number of spaces a tab counts for
+vim.opt.shiftwidth = 2     -- Number of spaces for each indent step
+vim.opt.softtabstop = 2    -- Number of spaces when editing
+vim.opt.expandtab = true   -- Convert tabs to spaces
+vim.opt.smartindent = true -- Smart autoindenting on new lines
+
 -- Disable Ctrl+Z motion
 vim.opt.backup = false -- Prevents creating a backup file
 vim.keymap.set("n", "<C-z>", "<Nop>", { desc = "Disable Ctrl+Z" }) -- Disable Ctrl+Z
@@ -25,6 +32,15 @@ vim.opt.shortmess:append("A") -- Ignore swapfile warnings when opening files
 
 -- save file on leader leader
 vim.keymap.set("n", "<leader><leader>", ":w<CR>", { desc = "Save file" })
+
+-- Auto-create parent directories when saving a file
+vim.api.nvim_create_autocmd("BufWritePre", {
+	group = vim.api.nvim_create_augroup("auto_create_dir", { clear = true }),
+	callback = function(event)
+		local file = vim.loop.fs_realpath(event.match) or event.match
+		vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
+	end,
+})
 
 -- Windows-specific: Exclude problematic directories from file watching
 local IS_WINDOWS = vim.fn.has("win32") == 1

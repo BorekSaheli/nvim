@@ -68,16 +68,23 @@ local function toggle_ascii_style()
 		config = {
 			header = ascii_styles[current_style],
 			shortcut = {
-				{ desc = "Lazy", group = "@property", action = "Lazy", key = "l" },
-				{ desc = "Files", group = "Label", action = "Telescope find_files", key = "f", icon = " " },
-				{ desc = "Grep", group = "Label", action = "Telescope live_grep", key = "g", icon = " " },
-				{ desc = "Quit", group = "Label", action = "q", key = "q", icon = " " },
+				{ desc = "Find File", group = "@property", action = "Telescope find_files", key = "f" },
+				{ desc = "Grep", group = "Label", action = "Telescope live_grep", key = "g" },
+				{ desc = "New File", group = "DiagnosticHint", action = "enew", key = "n" },
+				{ desc = "Lazy", group = "String", action = "Lazy", key = "l" },
+				{ desc = "Config", group = "Constant", action = "e ~/.config/nvim/init.lua", key = "c" },
+				{ desc = "Quit", group = "Error", action = "qa", key = "q" },
 			},
-			footer = {
-				"",
-				"____",
-				"",
-			},
+			footer = function()
+				local os_icons = {
+					Darwin = "\u{f179}  macOS",
+					Linux = "\u{f17c}  Linux",
+					Windows = "\u{f17a}  Windows",
+				}
+				local os_name = vim.loop.os_uname().sysname
+				return { "", os_icons[os_name] or ("\u{f109}  " .. os_name) }
+			end,
+			disable_move = true,
 		},
 	})
 
@@ -97,16 +104,23 @@ return {
 		config = {
 			header = ascii_styles[current_style],
 			shortcut = {
-				{ desc = "Lazy", group = "@property", action = "Lazy", key = "l" },
-				{ desc = "Files", group = "Label", action = "Telescope find_files", key = "f", icon = " " },
-				{ desc = "Grep", group = "Label", action = "Telescope live_grep", key = "g", icon = " " },
-				{ desc = "Quit", group = "Label", action = "q", key = "q", icon = " " },
+				{ desc = "Find File", group = "@property", action = "Telescope find_files", key = "f" },
+				{ desc = "Grep", group = "Label", action = "Telescope live_grep", key = "g" },
+				{ desc = "New File", group = "DiagnosticHint", action = "enew", key = "n" },
+				{ desc = "Lazy", group = "String", action = "Lazy", key = "l" },
+				{ desc = "Config", group = "Constant", action = "e ~/.config/nvim/init.lua", key = "c" },
+				{ desc = "Quit", group = "Error", action = "qa", key = "q" },
 			},
-			footer = {
-				"",
-				"____",
-				"",
-			},
+			footer = function()
+				local os_icons = {
+					Darwin = "\u{f179}  macOS",
+					Linux = "\u{f17c}  Linux",
+					Windows = "\u{f17a}  Windows",
+				}
+				local os_name = vim.loop.os_uname().sysname
+				return { "", os_icons[os_name] or ("\u{f109}  " .. os_name) }
+			end,
+			disable_move = true, -- This prevents scrolling
 		},
 	},
 }

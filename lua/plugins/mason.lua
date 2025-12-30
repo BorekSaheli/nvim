@@ -21,7 +21,16 @@ return {
 			local ensure_installed = {
 				"stylua", -- Lua formatter
 				"lua-language-server", -- Lua LSP
+				"rust-analyzer", -- Rust LSP
+				"clangd", -- C/C++ LSP
+				"gopls", -- Go LSP
+				"typescript-language-server", -- JavaScript/TypeScript LSP
+				"clang-format", -- C/C++ formatter
+				"goimports", -- Go imports formatter
+				"gofmt", -- Go formatter
+				"prettier", -- JS/TS formatter
 				-- Note: ruff and ty are installed manually with: uv tool install ruff ty
+				-- Note: rustfmt comes with Rust toolchain (rustup component add rustfmt)
 			}
 
 			local mr = require("mason-registry")

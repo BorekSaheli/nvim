@@ -1,10 +1,18 @@
 return {
 	"stevearc/conform.nvim",
-	event = { "BufWritePre" },
+	event = { "BufReadPost" },
 	opts = {
 		formatters_by_ft = {
 			lua = { "stylua" },
 			python = { "ruff_format", "ruff_organize_imports" },
+			rust = { "rustfmt" },
+			c = { "clang_format" },
+			cpp = { "clang_format" },
+			go = { "goimports", "gofmt" },
+			javascript = { "prettier" },
+			javascriptreact = { "prettier" },
+			typescript = { "prettier" },
+			typescriptreact = { "prettier" },
 		},
 		formatters = {
 			ruff_format = {

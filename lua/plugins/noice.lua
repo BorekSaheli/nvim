@@ -21,11 +21,15 @@ return {
 						col = "50%", -- Center horizontally
 					},
 					size = {
-						width = 60,
+						width = 80,
 						height = "auto",
 					},
 					border = {
 						style = "rounded",
+					},
+					win_options = {
+						wrap = true,
+						linebreak = true,
 					},
 				},
 				popupmenu = {
@@ -49,6 +53,10 @@ return {
 					size = {
 						width = "auto",
 						height = "auto",
+					},
+					win_options = {
+						wrap = true,
+						linebreak = true,
 					},
 				},
 			},

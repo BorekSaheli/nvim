@@ -1,8 +1,3 @@
-require("core.options")
-require("core.state")  -- Load state management early for diagnostics/toggles
-require("core.wezterm")  -- WezTerm terminal integration
-require("core.lazy")
-
 require("core.state")    -- Load first (used by options.lua)
 require("core.options")  -- Then options (uses state)
 require("core.lazy")     -- Finally plugins

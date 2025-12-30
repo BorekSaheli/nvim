@@ -122,6 +122,108 @@ return {
 				end,
 			})
 
+			-- Start rust-analyzer for Rust files
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "rust",
+				callback = function(ev)
+					local bufnr = ev.buf
+					local fname = vim.api.nvim_buf_get_name(bufnr)
+					local root = root_pattern("Cargo.toml", ".git")(fname) or vim.fn.getcwd()
+
+					-- Find rust-analyzer from Mason or PATH
+					local rust_analyzer_cmd = vim.fn.expand("~/.local/share/nvim/mason/bin/rust-analyzer")
+					if vim.fn.executable(rust_analyzer_cmd) ~= 1 then
+						rust_analyzer_cmd = "rust-analyzer"  -- Fallback to PATH
+					end
+
+					vim.lsp.start({
+						name = "rust_analyzer",
+						cmd = { rust_analyzer_cmd },
+						root_dir = root,
+						capabilities = capabilities,
+						settings = {
+							["rust-analyzer"] = {
+								cargo = {
+									allFeatures = true,
+								},
+								checkOnSave = {
+									command = "clippy",
+								},
+							},
+						},
+					}, { bufnr = bufnr })
+				end,
+			})
+
+			-- Start clangd for C/C++ files
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "c", "cpp", "objc", "objcpp" },
+				callback = function(ev)
+					local bufnr = ev.buf
+					local fname = vim.api.nvim_buf_get_name(bufnr)
+					local root = root_pattern("compile_commands.json", "compile_flags.txt", ".git")(fname) or vim.fn.getcwd()
+
+					-- Find clangd from Mason or PATH
+					local clangd_cmd = vim.fn.expand("~/.local/share/nvim/mason/bin/clangd")
+					if vim.fn.executable(clangd_cmd) ~= 1 then
+						clangd_cmd = "clangd"  -- Fallback to PATH
+					end
+
+					vim.lsp.start({
+						name = "clangd",
+						cmd = { clangd_cmd },
+						root_dir = root,
+						capabilities = capabilities,
+					}, { bufnr = bufnr })
+				end,
+			})
+
+			-- Start gopls for Go files
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "go",
+				callback = function(ev)
+					local bufnr = ev.buf
+					local fname = vim.api.nvim_buf_get_name(bufnr)
+					local root = root_pattern("go.mod", ".git")(fname) or vim.fn.getcwd()
+
+					-- Find gopls from Mason or PATH
+					local gopls_cmd = vim.fn.expand("~/.local/share/nvim/mason/bin/gopls")
+					if vim.fn.executable(gopls_cmd) ~= 1 then
+						gopls_cmd = "gopls"  -- Fallback to PATH
+					end
+
+					vim.lsp.start({
+						name = "gopls",
+						cmd = { gopls_cmd },
+						root_dir = root,
+						capabilities = capabilities,
+					}, { bufnr = bufnr })
+				end,
+			})
+
+			-- Start ts_ls for JavaScript/TypeScript files
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+				callback = function(ev)
+					local bufnr = ev.buf
+					local fname = vim.api.nvim_buf_get_name(bufnr)
+					local root = root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or vim.fn.getcwd()
+
+					-- Find typescript-language-server from Mason or PATH
+					local ts_ls_cmd = vim.fn.expand("~/.local/share/nvim/mason/bin/typescript-language-server")
+					if vim.fn.executable(ts_ls_cmd) ~= 1 then
+						ts_ls_cmd = "typescript-language-server"  -- Fallback to PATH
+					end
+
+					vim.lsp.start({
+						name = "ts_ls",
+						cmd = { ts_ls_cmd, "--stdio" },
+						root_dir = root,
+						capabilities = capabilities,
+					}, { bufnr = bufnr })
+				end,
+			})
+
 			-- Disable ruff's hover (ty provides better type info)
 			vim.api.nvim_create_autocmd("LspAttach", {
 				callback = function(args)
